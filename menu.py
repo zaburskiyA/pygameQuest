@@ -72,8 +72,11 @@ def play_function(difficulty, font, test=False):
     global main_menu
     global clock
 
-    if difficulty == 'EASY':  # здесь запускается наша игра
+    if difficulty == 'EASY':  # здесь запускается наша игра TODO
         f = font.render('Playing as a baby (easy)', 1, COLOR_WHITE)
+        '''Вместо f = font.render('Playing as a baby (easy)', 1, COLOR_WHITE)
+        здесь надо будет передавать сложность выбранную пользователем в нашу программу, отсюда и запускается игра.
+        И в 2 elif ниже то же самое'''
     elif difficulty == 'MEDIUM':
         f = font.render('Playing as a kid (medium)', 1, COLOR_WHITE)
     elif difficulty == 'HARD':
