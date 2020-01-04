@@ -11,9 +11,9 @@ import pygameMenu
 # Constants and global variables
 # -----------------------------------------------------------------------------
 ABOUT = ['pygameMenu {0}'.format(pygameMenu.__version__),
-         'Author: @{0}'.format(pygameMenu.__author__),
+         'Author: @{0}'.format('Egopoler and Zaburskiy_A'),
          pygameMenu.locals.TEXT_NEWLINE,
-         'Email: {0}'.format(pygameMenu.__email__)]
+         'Email: {0}'.format('zaburskiy@gmail.com\negopoler@gmail.com')]
 COLOR_BACKGROUND = (128, 0, 128)
 COLOR_BLACK = (0, 0, 0)
 COLOR_WHITE = (255, 255, 255)
