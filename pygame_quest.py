@@ -2,13 +2,52 @@ import os, pygame, random, sys
 
 pygame.init()
 infoObject = pygame.display.Info()
-screen = pygame.display.set_mode((infoObject.current_w- 500, infoObject.current_h - 300))
+screen = pygame.display.set_mode((infoObject.current_w - 500, infoObject.current_h - 300))
 size = width, height = infoObject.current_w, infoObject.current_h
-
 
 clock = pygame.time.Clock()
 FPS = 60
 STEP = 1
+
+
+class AnimatedSprite(pygame.sprite.Sprite):
+    def __init__(self, sheet, columns, rows, x, y):
+        super().__init__(all_sprites)
+        self.frames = []
+        self.cut_sheet(sheet, columns, rows)
+        self.cur_frame = 0
+        self.image = self.frames[self.cur_frame]
+        self.rect = self.rect.move(x, y)
+        self.check_frame = 0
+
+    def change(self, sheet, columns, rows, x, y):
+        self.frames = []
+        self.cut_sheet(sheet, columns, rows)
+        self.cur_frame %= 4
+        self.check_frame += 1
+        self.image = self.frames[self.cur_frame]
+        self.rect = self.rect.move(x, y)
+
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                self.frames.append(sheet.subsurface(pygame.Rect(
+                    frame_location, self.rect.size)))
+
+    def cut_sheet(self, sheet, columns, rows):
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
+                                sheet.get_height() // rows)
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                self.frames.append(sheet.subsurface(pygame.Rect(
+                    frame_location, self.rect.size)))
+
+    def update(self):
+        self.check_frame += 1
+        if self.check_frame % 70 == 0:
+            self.cur_frame = (self.cur_frame + 1) % len(self.frames)
+        self.image = self.frames[self.cur_frame]
 
 
 def load_image(name, colorkey=None):
@@ -43,7 +82,8 @@ def load_level(filename):
     return list(map(lambda x: x.ljust(max_width, '.'), level_map))
 
 
-tile_images = {'wall': load_image('box.png'), 'empty': load_image('grass.png'), 'door': load_image('door.png')}
+tile_images = {'wall': load_image('box.png'), 'empty': load_image('grass.png'),
+               'door': load_image('door.png')}
 player_image = load_image('mar.png', -1)
 
 tile_width = tile_height = 50
@@ -64,6 +104,7 @@ class Camera:
     def update(self, target):
         self.dx = -(target.rect.x + target.rect.w // 2 - width // 2)
         self.dy = -(target.rect.y + target.rect.h // 2 - height // 2)
+
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, tile_type, pos_x, pos_y):
@@ -100,8 +141,8 @@ def generate_level(level):
             elif level[y][x] == '1':
                 Tile('empty', x, y)
             elif level[y][x] == '@':
-                Tile('empty', x, y)
-                new_player = Player(x, y)
+                Tile('wall', x, y)
+                new_player = AnimatedSprite(load_image("player_D_inv.png"), 4, 1, 100, 100)
             elif level[y][x] == '/':
                 Tile('door', x, y)
 
@@ -163,12 +204,20 @@ while running:
             keypress = None
     if keypress == "r":
         player.rect.x += STEP
+        player.change(load_image("player_R_inv.png"), 4, 1, player.rect.x, player.rect.y)
+        player.update()
     if keypress == "l":
         player.rect.x -= STEP
+        player.change(load_image("player_L_inv.png"), 4, 1, player.rect.x, player.rect.y)
+        player.update()
     if keypress == "u":
         player.rect.y -= STEP
+        player.change(load_image("player_U_inv.png"), 4, 1, player.rect.x, player.rect.y)
+        player.update()
     if keypress == "d":
         player.rect.y += STEP
+        player.change(load_image("player_D_inv.png"), 4, 1, player.rect.x, player.rect.y)
+        player.update()
     screen.fill((0, 0, 0))
     all_sprites.draw(screen)
     player_group.draw(screen)
