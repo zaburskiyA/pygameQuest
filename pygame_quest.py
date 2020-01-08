@@ -84,7 +84,7 @@ def load_level(filename):
 
 tile_images = {'wall': load_image('box.png'), 'empty': load_image('grass.png'),
                'door': load_image('door.png'), 'table': load_image('table.png'),
-               'Nstand': load_image('nightstand_close.png')}
+               'Nstand': load_image('nightstand_close.png'), 'ladder': load_image('ladder.png')}
 player_image = load_image('mar.png', -1)
 
 tile_width = tile_height = 50
@@ -152,6 +152,8 @@ def generate_level(level):
                 Tile('table', x, y)
             elif level[y][x] == 'c':
                 Tile('Nstand', x, y)
+            elif level[y][x] == '*':
+                Tile('ladder', x, y)
 
     # вернем игрока, а также размер поля в клетках
     return new_player, x, y
