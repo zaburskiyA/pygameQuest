@@ -83,7 +83,8 @@ def load_level(filename):
 
 
 tile_images = {'wall': load_image('box.png'), 'empty': load_image('grass.png'),
-               'door': load_image('door.png')}
+               'door': load_image('door.png'), 'table': load_image('table.png'),
+               'Nstand': load_image('nightstand_close.png')}
 player_image = load_image('mar.png', -1)
 
 tile_width = tile_height = 50
@@ -145,6 +146,12 @@ def generate_level(level):
                 new_player = AnimatedSprite(load_image("player_D_inv.png"), 4, 1, 100, 100)
             elif level[y][x] == '/':
                 Tile('door', x, y)
+            elif level[y][x] == '&':
+                Tile('table', x, y)
+            elif level[y][x] == 't':
+                Tile('table', x, y)
+            elif level[y][x] == 'c':
+                Tile('Nstand', x, y)
 
     # вернем игрока, а также размер поля в клетках
     return new_player, x, y
