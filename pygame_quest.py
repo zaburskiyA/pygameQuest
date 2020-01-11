@@ -12,13 +12,14 @@ STEP = 1
 
 class AnimatedSprite(pygame.sprite.Sprite):
     def __init__(self, sheet, columns, rows, x, y):
-        super().__init__(all_sprites)
+        super().__init__(all_sprites, player_group)
         self.frames = []
         self.cut_sheet(sheet, columns, rows)
         self.cur_frame = 0
         self.image = self.frames[self.cur_frame]
         self.rect = self.rect.move(x, y)
         self.check_frame = 0
+        self.mask = pygame.mask.from_surface(self.image)
 
     def change(self, sheet, columns, rows, x, y):
         self.frames = []
@@ -48,6 +49,10 @@ class AnimatedSprite(pygame.sprite.Sprite):
         if self.check_frame % 70 == 0:
             self.cur_frame = (self.cur_frame + 1) % len(self.frames)
         self.image = self.frames[self.cur_frame]
+        coll = pygame.sprite.groupcollide(player_group, wall_group, False, False,
+                                          collided=pygame.sprite.collide_mask)
+        if coll:
+            print('collision')
 
 
 def load_image(name, colorkey=None):
@@ -104,7 +109,7 @@ class Camera:
     # позиционировать камеру на объекте target
     def update(self, target):
         self.dx = -(target.rect.x + target.rect.w // 2 - width // 3 - 100)
-        self.dy = -(target.rect.y + target.rect.h//2 - height // 3) + 25
+        self.dy = -(target.rect.y + target.rect.h // 2 - height // 3) + 25
 
 
 class Tile(pygame.sprite.Sprite):
@@ -114,11 +119,15 @@ class Tile(pygame.sprite.Sprite):
         self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y)
 
 
-class Player(pygame.sprite.Sprite):
-    def __init__(self, pos_x, pos_y):
-        super().__init__(player_group, all_sprites)
-        self.image = player_image
-        self.rect = self.image.get_rect().move(tile_width * pos_x + 15, tile_height * pos_y + 5)
+class Wall(pygame.sprite.Sprite):
+    image = load_image("box.png")
+
+    def __init__(self, x1, y1, x2, y2):
+        super().__init__(all_sprites, wall_group)
+        self.image = Wall.image
+        self.rect = pygame.Rect(x1 + 1, y1 + 1, x2 - 1, y2 - 1)
+        # вычисляем маску для эффективного сравнения
+        self.mask = pygame.mask.from_surface(self.image)
 
 
 player = None
@@ -127,6 +136,7 @@ player = None
 all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
+wall_group = pygame.sprite.Group()
 
 
 def generate_level(level):
@@ -137,6 +147,9 @@ def generate_level(level):
                 Tile('empty', x, y)
             elif level[y][x] == '#':
                 Tile('wall', x, y)
+                wall = Wall(x * 50, y * 50, x * 50 + 50, y * 50 + 50)
+
+
             elif level[y][x] == '.':
                 Tile('empty', x, y)
             elif level[y][x] == '1':
