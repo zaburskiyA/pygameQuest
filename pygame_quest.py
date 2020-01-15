@@ -52,7 +52,9 @@ class AnimatedSprite(pygame.sprite.Sprite):
         coll = pygame.sprite.groupcollide(player_group, wall_group, False, False,
                                           collided=pygame.sprite.collide_mask)
         if coll:
-            print('collision')
+            return True
+        else:
+            return False
 
 
 def load_image(name, colorkey=None):
@@ -227,19 +229,27 @@ while running:
     if keypress == "r":
         player.rect.x += STEP
         player.change(load_image("player_R_inv.png"), 4, 1, player.rect.x, player.rect.y)
-        player.update()
+        collis = player.update()
+        if collis:
+            player.rect.x -= STEP
     if keypress == "l":
         player.rect.x -= STEP
         player.change(load_image("player_L_inv.png"), 4, 1, player.rect.x, player.rect.y)
-        player.update()
+        collis = player.update()
+        if collis:
+            player.rect.x += STEP
     if keypress == "u":
         player.rect.y -= STEP
         player.change(load_image("player_U_inv.png"), 4, 1, player.rect.x, player.rect.y)
-        player.update()
+        collis = player.update()
+        if collis:
+            player.rect.y += STEP
     if keypress == "d":
         player.rect.y += STEP
         player.change(load_image("player_D_inv.png"), 4, 1, player.rect.x, player.rect.y)
-        player.update()
+        collis = player.update()
+        if collis:
+            player.rect.y -= STEP
     screen.fill((0, 0, 0))
     all_sprites.draw(screen)
     player_group.draw(screen)
