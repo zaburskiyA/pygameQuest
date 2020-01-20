@@ -131,9 +131,16 @@ class Wall(pygame.sprite.Sprite):
         # вычисляем маску для эффективного сравнения
         self.mask = pygame.mask.from_surface(self.image)
 
+
 class Table(pygame.sprite.Sprite):
     image = load_image("table.png")
     image2 = load_image("table.png")
+    imageY = load_image("ktableY.png")
+    imageR = load_image("ktableR.png")
+    imageB = load_image("ktableB.png")
+    imageYM = load_image("MktableY.png")
+    imageRM = load_image("MktableR.png")
+    imageBM = load_image("MktableB.png")
 
     def __init__(self, x, y, Money=0, rkey=False, bkey=False, ykey=False):
         # НЕОБХОДИМО вызвать конструктор родительского класса Sprite. Это очень важно !!!
@@ -145,7 +152,22 @@ class Table(pygame.sprite.Sprite):
         self.ykey = ykey
         self.rkey = rkey
         self.bkey = bkey
-        self.Money = 0
+        self.Money = Money
+        if self.rkey:
+            if self.Money == 0:
+                self.image = self.imageR
+            else:
+                self.image = self.imageRM
+        elif self.ykey:
+            if self.Money == 0:
+                self.image = self.imageY
+            else:
+                self.image = self.imageYM
+        elif self.bkey:
+            if self.Money == 0:
+                self.image = self.imageB
+            else:
+                self.image = self.imageBM
 
     def update(self, *args):
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(args[0].pos):
@@ -153,8 +175,12 @@ class Table(pygame.sprite.Sprite):
             if self.ykey:
                 self.ykey = False
                 print(1)
-
-
+            elif self.rkey:
+                self.rkey = False
+                print(1)
+            elif self.bkey:
+                self.bkey = False
+                print(1)
 
 player = None
 
@@ -188,7 +214,7 @@ def generate_level(level):
                 Tile('door', x, y)
             elif level[y][x] == '&':
                 Tile('table', x, y)
-                ktable = Table(x * 50, y * 50, ykey=True)
+                table = Table(x * 50, y * 50, ykey=True)
             elif level[y][x] == 't':
                 Tile('table', x, y)
             elif level[y][x] == 'c':
