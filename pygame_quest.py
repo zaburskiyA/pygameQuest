@@ -21,6 +21,11 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.rect = self.rect.move(x, y)
         self.check_frame = 0
         self.mask = pygame.mask.from_surface(self.image)
+        self.rkey = 0
+        self.ykey = 0
+        self.bkey = 0
+        self.bosskey = 0
+        self.Money = 0
 
     def change(self, sheet, columns, rows, x, y):
         self.frames = []
@@ -50,14 +55,58 @@ class AnimatedSprite(pygame.sprite.Sprite):
         if self.check_frame % 70 == 0:
             self.cur_frame = (self.cur_frame + 1) % len(self.frames)
         self.image = self.frames[self.cur_frame]
-        coll = pygame.sprite.groupcollide(player_group, wall_group,  False, False,
+        coll = pygame.sprite.groupcollide(player_group, wall_group, False, False,
                                           collided=pygame.sprite.collide_mask)
         coll1 = pygame.sprite.groupcollide(player_group, table_group, False, False,
-                                          collided=pygame.sprite.collide_mask)
+                                           collided=pygame.sprite.collide_mask)
         if coll or coll1:
             return True
         else:
             return False
+
+    def add_money(self, num):
+        """увеличивает количество денег персонажа на num"""
+        self.Money += num
+
+    def del_money(self, num):
+        """уменьшает количество денег персонажа на num"""
+        self.Money -= num
+
+    def check_money(self):
+        return self.Money
+
+    def check_key(self, tipe):
+        """просматривает количесво ключей нужного типа"""
+        if tipe == "r":
+            return self.rkey
+        elif tipe == "y":
+            return self.ykey
+        elif tipe == "b":
+            return self.bkey
+        elif tipe == "bosskey":
+            return self.bosskey
+
+    def add_key(self, tipe):
+        """добавляет персонажу нужный тип ключа"""
+        if tipe == "r":
+            self.rkey += 1
+        elif tipe == "y":
+            self.ykey += 1
+        elif tipe == "b":
+            self.bkey += 1
+        elif tipe == "bosskey":
+            self.bosskey += 1
+
+    def del_key(self, tipe):
+        """Отбирает у персонажа нужный тип ключа"""
+        if tipe == "r":
+            self.rkey -= 1
+        elif tipe == "y":
+            self.ykey -= 1
+        elif tipe == "b":
+            self.bkey -= 1
+        elif tipe == "bosskey":
+            self.bosskey -= 1
 
 
 def load_image(name, colorkey=None):
@@ -185,7 +234,7 @@ class Table(pygame.sprite.Sprite):
                 self.image = self.imageM
 
     def update(self, plx, ply, *args):
-        dist = sqrt((int(plx) - int(self.rect.x))**2 + (int(ply) - int(self.rect.y))**2) < 60 # флаг дистанция
+        dist = sqrt((int(plx) - int(self.rect.x)) ** 2 + (int(ply) - int(self.rect.y)) ** 2) < 60  # флаг дистанция
         # проверяет дистанцию между объетом и игроком
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(args[0].pos) and dist:
             self.image = self.image2
@@ -199,6 +248,7 @@ class Table(pygame.sprite.Sprite):
                 self.bkey = False
                 print(1)
             self.Money = 0
+
 
 player = None
 
