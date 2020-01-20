@@ -240,14 +240,19 @@ class Table(pygame.sprite.Sprite):
             self.image = self.image2
             if self.ykey:
                 self.ykey = False
-                print(1)
+                player.add_key("y")
             elif self.rkey:
                 self.rkey = False
-                print(1)
+                player.add_key("r")
             elif self.bkey:
                 self.bkey = False
-                print(1)
+                player.add_key("b")
+            player.add_money(self.Money)
             self.Money = 0
+            print(player.check_key("r"))
+            print(player.check_key("b"))
+            print(player.check_key("y"))
+            print(player.check_money())
 
 
 player = None
@@ -282,7 +287,7 @@ def generate_level(level):
                 Tile('door', x, y)
             elif level[y][x] == '&':
                 Tile('table', x, y)
-                table = Table(x * 50, y * 50, Money=random.choice((0, 0, 10)), ykey=True)
+                table = Table(x * 50, y * 50, Money=random.choice((0, 0, 10)), rkey=True)
             elif level[y][x] == 't':
                 Tile('table', x, y)
                 table = Table(x * 50, y * 50, Money=random.choice((0, 0, 10)))
