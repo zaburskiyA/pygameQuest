@@ -1,4 +1,5 @@
 import os, pygame, random, sys
+from math import sqrt
 
 pygame.init()
 infoObject = pygame.display.Info()
@@ -133,8 +134,10 @@ class Wall(pygame.sprite.Sprite):
 
 
 class Table(pygame.sprite.Sprite):
+    # картинки, которые используются в классе
     image = load_image("table.png")
     image2 = load_image("table.png")
+    imageM = load_image("Mtable.png")
     imageY = load_image("ktableY.png")
     imageR = load_image("ktableR.png")
     imageB = load_image("ktableB.png")
@@ -143,7 +146,9 @@ class Table(pygame.sprite.Sprite):
     imageBM = load_image("MktableB.png")
 
     def __init__(self, x, y, Money=0, rkey=False, bkey=False, ykey=False):
-        # НЕОБХОДИМО вызвать конструктор родительского класса Sprite. Это очень важно !!!
+        """Money - количество денег на столе, по умолчанию 0,
+        rkey, bkey, ykey - это ключи, которые находятся на столе. красный, синий, желтый ключь соответственно.
+        True - ключ есть, False - ключа нет. по умолчанию ключей нет"""
         super().__init__(all_sprites, table_group)
         self.image = Table.image
         self.rect = self.image.get_rect()
@@ -168,9 +173,15 @@ class Table(pygame.sprite.Sprite):
                 self.image = self.imageB
             else:
                 self.image = self.imageBM
+        else:
+            if self.Money == 0:
+                self.image = self.image2
+            else:
+                self.image = self.imageM
 
-    def update(self, *args):
-        if args and args[0].type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(args[0].pos):
+    def update(self, plx, ply, *args):
+        dist = sqrt((int(plx) - int(self.rect.x))**2 + (int(ply) - int(self.rect.y))**2) < 60
+        if args and args[0].type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(args[0].pos) and dist:
             self.image = self.image2
             if self.ykey:
                 self.ykey = False
@@ -181,6 +192,7 @@ class Table(pygame.sprite.Sprite):
             elif self.bkey:
                 self.bkey = False
                 print(1)
+            self.Money = 0
 
 player = None
 
@@ -214,9 +226,10 @@ def generate_level(level):
                 Tile('door', x, y)
             elif level[y][x] == '&':
                 Tile('table', x, y)
-                table = Table(x * 50, y * 50, ykey=True)
+                table = Table(x * 50, y * 50, Money=random.choice((0, 0, 10)), ykey=True)
             elif level[y][x] == 't':
                 Tile('table', x, y)
+                table = Table(x * 50, y * 50, Money=random.choice((0, 0, 10)))
             elif level[y][x] == 'c':
                 Tile('Nstand', x, y)
             elif level[y][x] == '*':
@@ -268,7 +281,7 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            table_group.update(event)
+            table_group.update(player.rect.x, player.rect.y, event)
         elif event.type == pygame.KEYDOWN:
             if event.key == 275:
                 keypress = "r"
