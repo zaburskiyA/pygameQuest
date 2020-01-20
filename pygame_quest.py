@@ -274,8 +274,6 @@ def generate_level(level):
             elif level[y][x] == '#':
                 Tile('wall', x, y)
                 wall = Wall(x * 50, y * 50, x * 50 + 50, y * 50 + 50)
-
-
             elif level[y][x] == '.':
                 Tile('empty', x, y)
             elif level[y][x] == '1':
@@ -283,11 +281,21 @@ def generate_level(level):
             elif level[y][x] == '@':
                 Tile('wall', x, y)
                 new_player = AnimatedSprite(load_image("player_D_inv.png"), 4, 1, 100, 100)
-            elif level[y][x] == '/':
+            elif level[y][x] == 'Y':
+                Tile('door', x, y)
+            elif level[y][x] == 'B':
+                Tile('door', x, y)
+            elif level[y][x] == 'R':
                 Tile('door', x, y)
             elif level[y][x] == '&':
                 Tile('table', x, y)
+                table = Table(x * 50, y * 50, Money=random.choice((0, 0, 10)), ykey=True)
+            elif level[y][x] == '+':
+                Tile('table', x, y)
                 table = Table(x * 50, y * 50, Money=random.choice((0, 0, 10)), rkey=True)
+            elif level[y][x] == '$':
+                Tile('table', x, y)
+                table = Table(x * 50, y * 50, Money=random.choice((0, 0, 10)), bkey=True)
             elif level[y][x] == 't':
                 Tile('table', x, y)
                 table = Table(x * 50, y * 50, Money=random.choice((0, 0, 10)))
