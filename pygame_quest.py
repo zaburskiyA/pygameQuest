@@ -50,9 +50,11 @@ class AnimatedSprite(pygame.sprite.Sprite):
         if self.check_frame % 70 == 0:
             self.cur_frame = (self.cur_frame + 1) % len(self.frames)
         self.image = self.frames[self.cur_frame]
-        coll = pygame.sprite.groupcollide(player_group, wall_group, False, False,
+        coll = pygame.sprite.groupcollide(player_group, wall_group,  False, False,
                                           collided=pygame.sprite.collide_mask)
-        if coll:
+        coll1 = pygame.sprite.groupcollide(player_group, table_group, False, False,
+                                          collided=pygame.sprite.collide_mask)
+        if coll or coll1:
             return True
         else:
             return False
@@ -136,6 +138,7 @@ class Wall(pygame.sprite.Sprite):
 class Table(pygame.sprite.Sprite):
     # картинки, которые используются в классе
     image = load_image("table.png")
+    maskim = load_image("mask.png")
     image2 = load_image("table.png")
     imageM = load_image("Mtable.png")
     imageY = load_image("ktableY.png")
@@ -158,6 +161,8 @@ class Table(pygame.sprite.Sprite):
         self.rkey = rkey
         self.bkey = bkey
         self.Money = Money
+        self.mask = pygame.mask.from_surface(self.maskim)
+        # идет нахождение нужной картинки в зависимости от значений
         if self.rkey:
             if self.Money == 0:
                 self.image = self.imageR
@@ -180,7 +185,8 @@ class Table(pygame.sprite.Sprite):
                 self.image = self.imageM
 
     def update(self, plx, ply, *args):
-        dist = sqrt((int(plx) - int(self.rect.x))**2 + (int(ply) - int(self.rect.y))**2) < 60
+        dist = sqrt((int(plx) - int(self.rect.x))**2 + (int(ply) - int(self.rect.y))**2) < 60 # флаг дистанция
+        # проверяет дистанцию между объетом и игроком
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(args[0].pos) and dist:
             self.image = self.image2
             if self.ykey:
