@@ -131,6 +131,30 @@ class Wall(pygame.sprite.Sprite):
         # вычисляем маску для эффективного сравнения
         self.mask = pygame.mask.from_surface(self.image)
 
+class Table(pygame.sprite.Sprite):
+    image = load_image("table.png")
+    image2 = load_image("table.png")
+
+    def __init__(self, x, y, Money=0, rkey=False, bkey=False, ykey=False):
+        # НЕОБХОДИМО вызвать конструктор родительского класса Sprite. Это очень важно !!!
+        super().__init__(all_sprites, table_group)
+        self.image = Table.image
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.ykey = ykey
+        self.rkey = rkey
+        self.bkey = bkey
+        self.Money = 0
+
+    def update(self, *args):
+        if args and args[0].type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(args[0].pos):
+            self.image = self.image2
+            if self.ykey:
+                self.ykey = False
+                print(1)
+
+
 
 player = None
 
@@ -139,6 +163,7 @@ all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 wall_group = pygame.sprite.Group()
+table_group = pygame.sprite.Group()
 
 
 def generate_level(level):
@@ -163,6 +188,7 @@ def generate_level(level):
                 Tile('door', x, y)
             elif level[y][x] == '&':
                 Tile('table', x, y)
+                ktable = Table(x * 50, y * 50, ykey=True)
             elif level[y][x] == 't':
                 Tile('table', x, y)
             elif level[y][x] == 'c':
@@ -215,6 +241,8 @@ while running:
         # при закрытии окна
         if event.type == pygame.QUIT:
             running = False
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            table_group.update(event)
         elif event.type == pygame.KEYDOWN:
             if event.key == 275:
                 keypress = "r"
