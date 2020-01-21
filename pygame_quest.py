@@ -186,6 +186,38 @@ class Wall(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
 
 
+class Nightstand(pygame.sprite.Sprite):
+    image = load_image("nightstand_close.png")
+    imageclose = load_image("nightstand_close.png")
+    imageopen = load_image("nightstand_open.png")
+    maskim = load_image("mask.png")
+
+    def __init__(self, x, y, Money=0, rkey=False, bkey=False, ykey=False):
+        """Money - количество денег на умбочке, по умолчанию 0,
+        rkey, bkey, ykey - это ключи, которые находятся на тумбочке. красный, синий, желтый ключь соответственно.
+        True - ключ есть, False - ключа нет. по умолчанию ключей нет"""
+        super().__init__(all_sprites, table_group)
+        self.image = Nightstand.image
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.ykey = ykey
+        self.rkey = rkey
+        self.bkey = bkey
+        self.Money = Money
+        self.mask = pygame.mask.from_surface(self.maskim)
+        self.close = 2  # степень закрытости
+
+    def update(self, plx, ply, *args):
+        dist = sqrt((int(plx) - int(self.rect.x)) ** 2 + (int(ply) - int(self.rect.y)) ** 2) < 60  # флаг дистанция
+        # проверяет дистанцию между объетом и игроком
+        if args and args[0].type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(args[0].pos) and dist:
+            if self.close == 2:
+                pass
+
+
+
+
 class Table(pygame.sprite.Sprite):
     # картинки, которые используются в классе
     image = load_image("table.png")
@@ -317,7 +349,6 @@ class Door(pygame.sprite.Sprite):
     def chek_open(self):
         """проверяет открыта ли дверь, возвращает True/False"""
         return self.open
-
 
 
 player = None
