@@ -59,7 +59,9 @@ class AnimatedSprite(pygame.sprite.Sprite):
                                           collided=pygame.sprite.collide_mask)
         coll1 = pygame.sprite.groupcollide(player_group, table_group, False, False,
                                            collided=pygame.sprite.collide_mask)
-        if coll or coll1:
+        coll2 = pygame.sprite.groupcollide(player_group, door_group, False, False,
+                                           collided=pygame.sprite.collide_mask)
+        if coll or coll1 or coll2:
             return True
         else:
             return False
@@ -260,6 +262,8 @@ class Door(pygame.sprite.Sprite):
     Yimage = load_image("Ydoor.png")
     Bimage = load_image("Bdoor.png")
     Rimage = load_image("Rdoor.png")
+    openi = load_image("grass.png")
+    emptmask = load_image("emptymask.png")
 
     def __init__(self, x, y, tipe, open=False):
         """x, y - координаты верхнего левого угла картинки
@@ -268,17 +272,44 @@ class Door(pygame.sprite.Sprite):
         super().__init__(all_sprites, door_group)
         self.image = Door.image
         self.rect = self.image.get_rect()
-        self.mask = pygame.mask.from_surface(self.image)
+        self.open = open
+        if not self.open:
+            self.mask = pygame.mask.from_surface(self.image)
         self.tipe = tipe
         self.rect.x = x
         self.rect.y = y
-        self.open = open
         if self.tipe == "Y":
             self.image = self.Yimage
         elif self.tipe == "R":
             self.image = self.Rimage
         elif self.tipe == "B":
             self.image = self.Bimage
+
+    def update(self, plx, ply, *args):
+        dist = sqrt((int(plx) - int(self.rect.x)) ** 2 + (int(ply) - int(self.rect.y)) ** 2) < 60  # флаг дистанция
+        # проверяет дистанцию между объетом и игроком
+        if args and args[0].type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(
+                args[0].pos) and dist and not self.open:
+            if self.tipe == "Y" and player.check_key("y") > 0:
+                player.del_key("y")
+                self.open = True
+                self.image = self.openi
+                self.mask = pygame.mask.from_surface(self.emptmask)
+            elif self.tipe == "R" and player.check_key("r") > 0:
+                player.del_key("r")
+                self.open = True
+                self.image = self.openi
+                self.mask = pygame.mask.from_surface(self.emptmask)
+            elif self.tipe == "B" and player.check_key("b") > 0:
+                player.del_key("b")
+                self.open = True
+                self.image = self.openi
+                self.mask = pygame.mask.from_surface(self.emptmask)
+
+    def chek_open(self):
+        """проверяет открыта ли дверь, возвращает True/False"""
+        return self.open
+
 
 
 player = None
@@ -381,6 +412,7 @@ while running:
             running = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
             table_group.update(player.rect.x, player.rect.y, event)
+            door_group.update(player.rect.x, player.rect.y, event)
         elif event.type == pygame.KEYDOWN:
             if event.key == 275:
                 keypress = "r"
