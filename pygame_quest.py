@@ -255,6 +255,32 @@ class Table(pygame.sprite.Sprite):
             print(player.check_money())
 
 
+class Door(pygame.sprite.Sprite):
+    image = load_image("door.png")
+    Yimage = load_image("Ydoor.png")
+    Bimage = load_image("Bdoor.png")
+    Rimage = load_image("Rdoor.png")
+
+    def __init__(self, x, y, tipe, open=False):
+        """x, y - координаты верхнего левого угла картинки
+        col - это цвет двери
+        open - открыта или закрыта дверь. по умолчанию False"""
+        super().__init__(all_sprites, door_group)
+        self.image = Door.image
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+        self.tipe = tipe
+        self.rect.x = x
+        self.rect.y = y
+        self.open = open
+        if self.tipe == "Y":
+            self.image = self.Yimage
+        elif self.tipe == "R":
+            self.image = self.Rimage
+        elif self.tipe == "B":
+            self.image = self.Bimage
+
+
 player = None
 
 # группы спрайтов
@@ -263,6 +289,7 @@ tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 wall_group = pygame.sprite.Group()
 table_group = pygame.sprite.Group()
+door_group = pygame.sprite.Group()
 
 
 def generate_level(level):
@@ -283,10 +310,13 @@ def generate_level(level):
                 new_player = AnimatedSprite(load_image("player_D_inv.png"), 4, 1, 100, 100)
             elif level[y][x] == 'Y':
                 Tile('door', x, y)
+                door = Door(x * 50, y * 50, "Y")
             elif level[y][x] == 'B':
                 Tile('door', x, y)
+                door = Door(x * 50, y * 50, "B")
             elif level[y][x] == 'R':
                 Tile('door', x, y)
+                door = Door(x * 50, y * 50, "R")
             elif level[y][x] == '&':
                 Tile('table', x, y)
                 table = Table(x * 50, y * 50, Money=random.choice((0, 0, 10)), ykey=True)
