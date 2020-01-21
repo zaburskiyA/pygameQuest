@@ -264,6 +264,7 @@ class Door(pygame.sprite.Sprite):
     Rimage = load_image("Rdoor.png")
     openi = load_image("grass.png")
     emptmask = load_image("emptymask.png")
+    bossdoor = load_image("Bossdoor.png")
 
     def __init__(self, x, y, tipe, open=False):
         """x, y - координаты верхнего левого угла картинки
@@ -284,6 +285,8 @@ class Door(pygame.sprite.Sprite):
             self.image = self.Rimage
         elif self.tipe == "B":
             self.image = self.Bimage
+        elif self.tipe == "Boss":
+            self.image = self.bossdoor
 
     def update(self, plx, ply, *args):
         dist = sqrt((int(plx) - int(self.rect.x)) ** 2 + (int(ply) - int(self.rect.y)) ** 2) < 60  # флаг дистанция
@@ -302,6 +305,11 @@ class Door(pygame.sprite.Sprite):
                 self.mask = pygame.mask.from_surface(self.emptmask)
             elif self.tipe == "B" and player.check_key("b") > 0:
                 player.del_key("b")
+                self.open = True
+                self.image = self.openi
+                self.mask = pygame.mask.from_surface(self.emptmask)
+            elif self.tipe == "Boss" and player.check_key("bosskey") > 0:
+                player.del_key("bosskey")
                 self.open = True
                 self.image = self.openi
                 self.mask = pygame.mask.from_surface(self.emptmask)
@@ -342,6 +350,9 @@ def generate_level(level):
             elif level[y][x] == 'Y':
                 Tile('door', x, y)
                 door = Door(x * 50, y * 50, "Y")
+            elif level[y][x] == '=':
+                Tile('door', x, y)
+                door = Door(x * 50, y * 50, "Boss")
             elif level[y][x] == 'B':
                 Tile('door', x, y)
                 door = Door(x * 50, y * 50, "B")
