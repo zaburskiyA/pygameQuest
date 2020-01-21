@@ -438,6 +438,9 @@ def generate_level(level):
             elif level[y][x] == 'c':
                 Tile('Nstand', x, y)
                 Nstand = Nightstand(x * 50, y * 50, Money=random.choice((0, 0, 10)))
+            elif level[y][x] == 's':
+                Tile('Nstand', x, y)
+                Nstand = Nightstand(x * 50, y * 50, Money=random.choice((0, 0, 10)), ykey=True)
             elif level[y][x] == '*':
                 Tile('ladder', x, y)
 
