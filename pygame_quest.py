@@ -191,6 +191,10 @@ class Nightstand(pygame.sprite.Sprite):
     imageclose = load_image("nightstand_close.png")
     imageopen = load_image("nightstand_open.png")
     maskim = load_image("mask.png")
+    Mimage = load_image("Mnightstand_close.png")
+    imageopenR = load_image("nightstandR_open.png")
+    imageopenB = load_image("nightstandB_open.png")
+    imageopenY = load_image("nightstandY_open.png")
 
     def __init__(self, x, y, Money=0, rkey=False, bkey=False, ykey=False):
         """Money - количество денег на умбочке, по умолчанию 0,
@@ -206,15 +210,44 @@ class Nightstand(pygame.sprite.Sprite):
         self.bkey = bkey
         self.Money = Money
         self.mask = pygame.mask.from_surface(self.maskim)
-        self.close = 2  # степень закрытости
+        self.close = 2  # степень закрытости 2 - закрыт полностью, 1 - закрыт, но там есть лут, 0 - открыт и пуст
+        if self.Money > 0:
+            self.image = self.Mimage
 
     def update(self, plx, ply, *args):
         dist = sqrt((int(plx) - int(self.rect.x)) ** 2 + (int(ply) - int(self.rect.y)) ** 2) < 60  # флаг дистанция
         # проверяет дистанцию между объетом и игроком
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(args[0].pos) and dist:
             if self.close == 2:
-                pass
-
+                if self.rkey:
+                    self.image = self.imageopenR
+                    self.close = 1
+                elif self.ykey:
+                    self.image = self.imageopenY
+                    self.close = 1
+                elif self.bkey:
+                    self.image = self.imageopenY
+                    self.close = 1
+                else:
+                    self.image = self.imageopen
+                    self.close = 0
+                player.add_money(self.Money)
+                self.Money = 0
+            elif self.close == 1:
+                if self.ykey:
+                    self.ykey = False
+                    player.add_key("y")
+                elif self.rkey:
+                    self.rkey = False
+                    player.add_key("r")
+                elif self.bkey:
+                    self.bkey = False
+                    player.add_key("b")
+                self.image = self.imageopen
+                self.close = 0
+            elif self.close == 0:
+                self.image = self.imageclose
+                self.close = 2
 
 
 
@@ -404,6 +437,7 @@ def generate_level(level):
                 table = Table(x * 50, y * 50, Money=random.choice((0, 0, 10)))
             elif level[y][x] == 'c':
                 Tile('Nstand', x, y)
+                Nstand = Nightstand(x * 50, y * 50, Money=random.choice((0, 0, 10)))
             elif level[y][x] == '*':
                 Tile('ladder', x, y)
 
