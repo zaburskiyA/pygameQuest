@@ -501,6 +501,8 @@ while running:
                 keypress = "u"
             elif event.key == 274:
                 keypress = "d"
+            elif event.key == 102:
+                keypress = "f"
         elif event.type == pygame.KEYUP:
             keypress = None
     if keypress == "r":
@@ -527,6 +529,12 @@ while running:
         collis = player.update()
         if collis:
             player.rect.y -= STEP
+    if keypress == "f":
+        player.rect.y += 5
+        player.change(load_image("hitD.png"), 4, 1, player.rect.x, player.rect.y)
+        collis = player.update()
+        if collis:
+            player.rect.y -= 5
     screen.fill((0, 0, 0))
     all_sprites.draw(screen)
     player_group.draw(screen)
