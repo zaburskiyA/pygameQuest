@@ -482,6 +482,7 @@ player, level_x, level_y = generate_level(load_level('карта.txt'))
 running = True
 keypress = None
 camera = Camera()
+watch = "d"
 
 while running:
 
@@ -509,32 +510,55 @@ while running:
         player.rect.x += STEP
         player.change(load_image("player_R_inv.png"), 4, 1, player.rect.x, player.rect.y)
         collis = player.update()
+        watch = "r"
         if collis:
             player.rect.x -= STEP
     if keypress == "l":
         player.rect.x -= STEP
         player.change(load_image("player_L_inv.png"), 4, 1, player.rect.x, player.rect.y)
         collis = player.update()
+        watch = "l"
         if collis:
             player.rect.x += STEP
     if keypress == "u":
         player.rect.y -= STEP
         player.change(load_image("player_U_inv.png"), 4, 1, player.rect.x, player.rect.y)
         collis = player.update()
+        watch = "u"
         if collis:
             player.rect.y += STEP
     if keypress == "d":
         player.rect.y += STEP
         player.change(load_image("player_D_inv.png"), 4, 1, player.rect.x, player.rect.y)
         collis = player.update()
+        watch = "d"
         if collis:
             player.rect.y -= STEP
     if keypress == "f":
-        player.rect.y += 5
-        player.change(load_image("hitD.png"), 4, 1, player.rect.x, player.rect.y)
-        collis = player.update()
-        if collis:
-            player.rect.y -= 5
+        if watch == "r":
+            player.rect.x += 1
+            player.change(load_image("hitR.png"), 4, 1, player.rect.x, player.rect.y)
+            collis = player.update()
+            if collis:
+                player.rect.x -= 1
+        elif watch == "l":
+            player.rect.x -= 1
+            player.change(load_image("hitL.png"), 4, 1, player.rect.x, player.rect.y)
+            collis = player.update()
+            if collis:
+                player.rect.x += 1
+        elif watch == "u":
+            player.rect.y -= 1
+            player.change(load_image("hitU.png"), 4, 1, player.rect.x, player.rect.y)
+            collis = player.update()
+            if collis:
+                player.rect.y += 1
+        elif watch == "d":
+            player.rect.y += 1
+            player.change(load_image("hitD.png"), 4, 1, player.rect.x, player.rect.y)
+            collis = player.update()
+            if collis:
+                player.rect.y -= 1
     screen.fill((0, 0, 0))
     all_sprites.draw(screen)
     player_group.draw(screen)
