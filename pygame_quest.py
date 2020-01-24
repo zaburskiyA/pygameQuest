@@ -1,3 +1,4 @@
+import math
 import os, pygame, random, sys
 from math import sqrt
 
@@ -8,7 +9,49 @@ size = width, height = infoObject.current_w, infoObject.current_h
 
 clock = pygame.time.Clock()
 FPS = 60
-STEP = 1
+STEP = 3
+
+
+class Skeleton(pygame.sprite.Sprite):
+    def __init__(self, sheet, columns, rows, x, y):
+        super().__init__(all_sprites, monster_gr)
+        self.frames = []
+        self.cut_sheet(sheet, columns, rows)
+        self.cur_frame = 0
+        self.image = self.frames[self.cur_frame]
+        self.rect = self.rect.move(x, y)
+        self.check_update = 0
+
+    def cut_sheet(self, sheet, columns, rows):
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
+                                sheet.get_height() // rows)
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                self.frames.append(sheet.subsurface(pygame.Rect(
+                    frame_location, self.rect.size)))
+
+    def move_towards_player(self, player):
+        dx, dy = player.rect.x - self.rect.x, player.rect.y - self.rect.y
+        dist = math.hypot(dx, dy) + 1
+        dx, dy = dx / dist, dy / dist
+        self.rect.x += dx * 2
+        self.rect.y += dy * 2
+        coll = pygame.sprite.groupcollide(monster_gr, wall_group, False, False,
+                                          collided=pygame.sprite.collide_mask)
+        coll1 = pygame.sprite.groupcollide(monster_gr, table_group, False, False,
+                                           collided=pygame.sprite.collide_mask)
+        coll2 = pygame.sprite.groupcollide(monster_gr, door_group, False, False,
+                                           collided=pygame.sprite.collide_mask)
+        if coll or coll1 or coll2:
+            pass  # pass TODO
+
+    def update(self):
+        self.check_update += 1
+        self.move_towards_player(player)
+        if self.check_update % 30 == 0:
+            self.cur_frame = (self.cur_frame + 1) % len(self.frames)
+            self.image = self.frames[self.cur_frame]
 
 
 class AnimatedSprite(pygame.sprite.Sprite):
@@ -21,9 +64,9 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.rect = self.rect.move(x, y)
         self.check_frame = 0
         self.mask = pygame.mask.from_surface(self.image)
-        self.rkey = 0
-        self.ykey = 0
-        self.bkey = 0
+        self.rkey = 10
+        self.ykey = 10
+        self.bkey = 10
         self.bosskey = 0
         self.Money = 0
 
@@ -52,7 +95,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
 
     def update(self):
         self.check_frame += 1
-        if self.check_frame % 70 == 0:
+        if self.check_frame % 40 == 0:
             self.cur_frame = (self.cur_frame + 1) % len(self.frames)
         self.image = self.frames[self.cur_frame]
         coll = pygame.sprite.groupcollide(player_group, wall_group, False, False,
@@ -250,7 +293,6 @@ class Nightstand(pygame.sprite.Sprite):
                 self.close = 2
 
 
-
 class Table(pygame.sprite.Sprite):
     # картинки, которые используются в классе
     image = load_image("table.png")
@@ -393,6 +435,7 @@ player_group = pygame.sprite.Group()
 wall_group = pygame.sprite.Group()
 table_group = pygame.sprite.Group()
 door_group = pygame.sprite.Group()
+monster_gr = pygame.sprite.Group()
 
 
 def generate_level(level):
@@ -443,9 +486,15 @@ def generate_level(level):
                 Nstand = Nightstand(x * 50, y * 50, Money=random.choice((0, 0, 10)), ykey=True)
             elif level[y][x] == '*':
                 Tile('ladder', x, y)
+            elif level[y][x] == '2':
+                Tile('empty', x, y)
+                skelet = Skeleton(load_image("skeleton.png"), 4, 1, 100, 500)
 
     # вернем игрока, а также размер поля в клетках
     return new_player, x, y
+
+
+skelet = Skeleton(load_image("skeleton.png"), 4, 1, 100, 500)
 
 
 def start_screen():
@@ -503,6 +552,7 @@ while running:
                 keypress = "d"
         elif event.type == pygame.KEYUP:
             keypress = None
+
     if keypress == "r":
         player.rect.x += STEP
         player.change(load_image("player_R_inv.png"), 4, 1, player.rect.x, player.rect.y)
@@ -527,10 +577,13 @@ while running:
         collis = player.update()
         if collis:
             player.rect.y -= STEP
+
+    monster_gr.update()
     screen.fill((0, 0, 0))
     all_sprites.draw(screen)
     player_group.draw(screen)
     pygame.display.flip()
+    clock.tick(FPS)
     # изменяем ракурс камеры
     camera.update(player);
     # обновляем положение всех спрайтов
