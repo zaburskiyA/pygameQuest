@@ -42,7 +42,7 @@ class Skeleton(pygame.sprite.Sprite):
         dx, dy = dx / dist, dy / dist
 
         px, py = player.coord()
-        dx2, dy2 = px - self.xd2 , py - self.yd2
+        dx2, dy2 = px - self.xd2, py - self.yd2
         dist2 = math.hypot(dx2, dy2) + 1
 
         coll = pygame.sprite.groupcollide(monster_gr, wall_group, False, False,
@@ -51,6 +51,7 @@ class Skeleton(pygame.sprite.Sprite):
                                            collided=pygame.sprite.collide_mask)
         coll2 = pygame.sprite.groupcollide(monster_gr, door_group, False, False,
                                            collided=pygame.sprite.collide_mask)
+
         if abs(dist2) < 200:
             if coll or coll1 or coll2:
                 self.rect.x -= dx * 2
@@ -62,7 +63,10 @@ class Skeleton(pygame.sprite.Sprite):
                 self.rect.y += dy * 2
                 self.x += dx * 2
                 self.y += dy * 2
-
+        if dx < 0:
+            self.change(load_image('skeletonL.png'), 4, 1, self.rect.x, self.rect.y)
+        else:
+            self.change(load_image('skeleton.png'), 4, 1, self.rect.x, self.rect.y)
 
     def update(self):
         self.check_update += 1
@@ -70,6 +74,19 @@ class Skeleton(pygame.sprite.Sprite):
         if self.check_update % 30 == 0:
             self.cur_frame = (self.cur_frame + 1) % len(self.frames)
             self.image = self.frames[self.cur_frame]
+
+    def change(self, sheet, columns, rows, x, y):
+        self.frames = []
+        self.cut_sheet(sheet, columns, rows)
+        self.cur_frame %= 4
+        self.image = self.frames[self.cur_frame]
+        self.rect = self.rect.move(x, y)
+
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                self.frames.append(sheet.subsurface(pygame.Rect(
+                    frame_location, self.rect.size)))
 
 
 class AnimatedSprite(pygame.sprite.Sprite):
@@ -175,7 +192,6 @@ class AnimatedSprite(pygame.sprite.Sprite):
 
     def coord(self):
         return self.x, self.y
-
 
 
 def load_image(name, colorkey=None):
@@ -513,7 +529,6 @@ def generate_level(level):
                 Tile('ladder', x, y)
             elif level[y][x] == '2':
                 Tile('empty', x, y)
-
 
     # вернем игрока, а также размер поля в клетках
     return new_player, x, y
