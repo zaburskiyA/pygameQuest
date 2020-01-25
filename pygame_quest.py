@@ -617,28 +617,36 @@ while running:
     if keypress == "f":
         if watch == "r":
             player.rect.x += 1
+            player.x += 1
             player.change(load_image("hitR.png"), 4, 1, player.rect.x, player.rect.y)
             collis = player.update()
             if collis:
                 player.rect.x -= 1
+                player.x -= 1
         elif watch == "l":
             player.rect.x -= 1
+            player.x -= 1
             player.change(load_image("hitL.png"), 4, 1, player.rect.x, player.rect.y)
             collis = player.update()
             if collis:
                 player.rect.x += 1
+                player.x += 1
         elif watch == "u":
             player.rect.y -= 1
+            player.y -= 1
             player.change(load_image("hitU.png"), 4, 1, player.rect.x, player.rect.y)
             collis = player.update()
             if collis:
                 player.rect.y += 1
+                player.y -= 1
         elif watch == "d":
             player.rect.y += 1
+            player.y += 1
             player.change(load_image("hitD.png"), 4, 1, player.rect.x, player.rect.y)
             collis = player.update()
             if collis:
                 player.rect.y -= 1
+                player.y -= 1
     monster_gr.update()
     screen.fill((0, 0, 0))
     all_sprites.draw(screen)
