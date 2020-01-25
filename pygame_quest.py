@@ -20,6 +20,10 @@ class Skeleton(pygame.sprite.Sprite):
         self.cur_frame = 0
         self.image = self.frames[self.cur_frame]
         self.rect = self.rect.move(x, y)
+        self.xd2 = x
+        self.yd2 = y
+        self.x = x
+        self.y = y
         self.check_update = 0
 
     def cut_sheet(self, sheet, columns, rows):
@@ -32,19 +36,33 @@ class Skeleton(pygame.sprite.Sprite):
                     frame_location, self.rect.size)))
 
     def move_towards_player(self, player):
+
         dx, dy = player.rect.x - self.rect.x, player.rect.y - self.rect.y
         dist = math.hypot(dx, dy) + 1
         dx, dy = dx / dist, dy / dist
-        self.rect.x += dx * 2
-        self.rect.y += dy * 2
+
+        px, py = player.coord()
+        dx2, dy2 = px - self.xd2 , py - self.yd2
+        dist2 = math.hypot(dx2, dy2) + 1
+
         coll = pygame.sprite.groupcollide(monster_gr, wall_group, False, False,
                                           collided=pygame.sprite.collide_mask)
         coll1 = pygame.sprite.groupcollide(monster_gr, table_group, False, False,
                                            collided=pygame.sprite.collide_mask)
         coll2 = pygame.sprite.groupcollide(monster_gr, door_group, False, False,
                                            collided=pygame.sprite.collide_mask)
-        if coll or coll1 or coll2:
-            pass  # pass TODO
+        if abs(dist2) < 200:
+            if coll or coll1 or coll2:
+                self.rect.x -= dx * 2
+                self.rect.y -= dy * 2
+                self.x -= dx * 2
+                self.y -= dy * 2
+            else:
+                self.rect.x += dx * 2
+                self.rect.y += dy * 2
+                self.x += dx * 2
+                self.y += dy * 2
+
 
     def update(self):
         self.check_update += 1
@@ -69,6 +87,8 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.bkey = 10
         self.bosskey = 0
         self.Money = 0
+        self.x = x
+        self.y = y
 
     def change(self, sheet, columns, rows, x, y):
         self.frames = []
@@ -152,6 +172,10 @@ class AnimatedSprite(pygame.sprite.Sprite):
             self.bkey -= 1
         elif tipe == "bosskey":
             self.bosskey -= 1
+
+    def coord(self):
+        return self.x, self.y
+
 
 
 def load_image(name, colorkey=None):
@@ -454,6 +478,7 @@ def generate_level(level):
             elif level[y][x] == '@':
                 Tile('wall', x, y)
                 new_player = AnimatedSprite(load_image("player_D_inv.png"), 4, 1, 100, 100)
+                skelet = Skeleton(load_image("skeleton.png"), 4, 1, 350, 400)
             elif level[y][x] == 'Y':
                 Tile('door', x, y)
                 door = Door(x * 50, y * 50, "Y")
@@ -488,14 +513,10 @@ def generate_level(level):
                 Tile('ladder', x, y)
             elif level[y][x] == '2':
                 Tile('empty', x, y)
-                skelet = Skeleton(load_image("skeleton.png"), 4, 1, 100, 500)
+
 
     # вернем игрока, а также размер поля в клетках
     return new_player, x, y
-
-
-skelet = Skeleton(load_image("skeleton.png"), 4, 1, 100, 500)
-
 
 def start_screen():
     intro_text = ["ЗАСТАВКА", "",
@@ -557,26 +578,34 @@ while running:
         player.rect.x += STEP
         player.change(load_image("player_R_inv.png"), 4, 1, player.rect.x, player.rect.y)
         collis = player.update()
+        player.x += STEP
         if collis:
             player.rect.x -= STEP
+            player.x -= STEP
     if keypress == "l":
         player.rect.x -= STEP
+        player.x -= STEP
         player.change(load_image("player_L_inv.png"), 4, 1, player.rect.x, player.rect.y)
         collis = player.update()
         if collis:
             player.rect.x += STEP
+            player.x += STEP
     if keypress == "u":
         player.rect.y -= STEP
+        player.y -= STEP
         player.change(load_image("player_U_inv.png"), 4, 1, player.rect.x, player.rect.y)
         collis = player.update()
         if collis:
             player.rect.y += STEP
+            player.y += STEP
     if keypress == "d":
         player.rect.y += STEP
+        player.y += STEP
         player.change(load_image("player_D_inv.png"), 4, 1, player.rect.x, player.rect.y)
         collis = player.update()
         if collis:
             player.rect.y -= STEP
+            player.y -= STEP
 
     monster_gr.update()
     screen.fill((0, 0, 0))
