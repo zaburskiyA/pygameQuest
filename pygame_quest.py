@@ -1,4 +1,3 @@
-import math
 import os, pygame, random, sys
 from math import sqrt
 
@@ -459,7 +458,6 @@ player_group = pygame.sprite.Group()
 wall_group = pygame.sprite.Group()
 table_group = pygame.sprite.Group()
 door_group = pygame.sprite.Group()
-monster_gr = pygame.sprite.Group()
 
 
 def generate_level(level):
@@ -518,6 +516,7 @@ def generate_level(level):
     # вернем игрока, а также размер поля в клетках
     return new_player, x, y
 
+
 def start_screen():
     intro_text = ["ЗАСТАВКА", "",
                   "Правила игры",
@@ -552,6 +551,7 @@ player, level_x, level_y = generate_level(load_level('карта.txt'))
 running = True
 keypress = None
 camera = Camera()
+watch = "d"
 
 while running:
 
@@ -571,13 +571,15 @@ while running:
                 keypress = "u"
             elif event.key == 274:
                 keypress = "d"
+            elif event.key == 102:
+                keypress = "f"
         elif event.type == pygame.KEYUP:
             keypress = None
-
     if keypress == "r":
         player.rect.x += STEP
         player.change(load_image("player_R_inv.png"), 4, 1, player.rect.x, player.rect.y)
         collis = player.update()
+        watch = "r"
         player.x += STEP
         if collis:
             player.rect.x -= STEP
@@ -587,6 +589,7 @@ while running:
         player.x -= STEP
         player.change(load_image("player_L_inv.png"), 4, 1, player.rect.x, player.rect.y)
         collis = player.update()
+        watch = "l"
         if collis:
             player.rect.x += STEP
             player.x += STEP
@@ -595,6 +598,7 @@ while running:
         player.y -= STEP
         player.change(load_image("player_U_inv.png"), 4, 1, player.rect.x, player.rect.y)
         collis = player.update()
+        watch = "u"
         if collis:
             player.rect.y += STEP
             player.y += STEP
@@ -603,11 +607,37 @@ while running:
         player.y += STEP
         player.change(load_image("player_D_inv.png"), 4, 1, player.rect.x, player.rect.y)
         collis = player.update()
+        watch = "d"
         if collis:
             player.rect.y -= STEP
             player.y -= STEP
 
     monster_gr.update()
+    if keypress == "f":
+        if watch == "r":
+            player.rect.x += 1
+            player.change(load_image("hitR.png"), 4, 1, player.rect.x, player.rect.y)
+            collis = player.update()
+            if collis:
+                player.rect.x -= 1
+        elif watch == "l":
+            player.rect.x -= 1
+            player.change(load_image("hitL.png"), 4, 1, player.rect.x, player.rect.y)
+            collis = player.update()
+            if collis:
+                player.rect.x += 1
+        elif watch == "u":
+            player.rect.y -= 1
+            player.change(load_image("hitU.png"), 4, 1, player.rect.x, player.rect.y)
+            collis = player.update()
+            if collis:
+                player.rect.y += 1
+        elif watch == "d":
+            player.rect.y += 1
+            player.change(load_image("hitD.png"), 4, 1, player.rect.x, player.rect.y)
+            collis = player.update()
+            if collis:
+                player.rect.y -= 1
     screen.fill((0, 0, 0))
     all_sprites.draw(screen)
     player_group.draw(screen)
