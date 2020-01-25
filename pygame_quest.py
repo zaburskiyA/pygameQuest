@@ -1,5 +1,6 @@
 import os, pygame, random, sys
 from math import sqrt
+import math
 
 pygame.init()
 infoObject = pygame.display.Info()
@@ -458,6 +459,7 @@ player_group = pygame.sprite.Group()
 wall_group = pygame.sprite.Group()
 table_group = pygame.sprite.Group()
 door_group = pygame.sprite.Group()
+monster_gr = pygame.sprite.Group()
 
 
 def generate_level(level):
@@ -612,7 +614,6 @@ while running:
             player.rect.y -= STEP
             player.y -= STEP
 
-    monster_gr.update()
     if keypress == "f":
         if watch == "r":
             player.rect.x += 1
@@ -638,6 +639,7 @@ while running:
             collis = player.update()
             if collis:
                 player.rect.y -= 1
+    monster_gr.update()
     screen.fill((0, 0, 0))
     all_sprites.draw(screen)
     player_group.draw(screen)
