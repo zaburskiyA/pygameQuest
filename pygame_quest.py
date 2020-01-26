@@ -82,6 +82,17 @@ class Skeleton(pygame.sprite.Sprite):
                         player.del_life(self.damage)
                         print(player.life)
                         timer = True
+                        """
+                        if player.life <= 0:
+                            if player.life_count > 0:
+                                player.life_count -= 1
+                                player.rect.x = 100
+                                player.x = 100
+                                player.rect.y = 100
+                                player.y = 100
+                        """
+
+
                 else:
                     timer = True
 
@@ -146,6 +157,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.x = x
         self.y = y
         self.flag_sk = False
+        self.life_count = 3
 
     def change(self, sheet, columns, rows, x, y):
         self.frames = []
@@ -293,6 +305,7 @@ tile_images = {'wall': load_image('box.png'), 'empty': load_image('grass.png'),
 player_image = load_image('mar.png', -1)
 
 tile_width = tile_height = 50
+
 
 
 class Camera:
@@ -556,6 +569,8 @@ def generate_level(level):
                 Tile('wall', x, y)
                 new_player = AnimatedSprite(load_image("player_D_inv.png"), 4, 1, 100, 100)
                 skelet = Skeleton(load_image("skeleton.png"), 4, 1, 350, 400)
+                skelet = Skeleton(load_image("skeleton.png"), 4, 1, 700, 100)
+                skelet = Skeleton(load_image("skeleton.png"), 4, 1, 700, 400)
             elif level[y][x] == 'Y':
                 Tile('door', x, y)
                 door = Door(x * 50, y * 50, "Y")
@@ -633,6 +648,7 @@ camera = Camera()
 watch = "d"
 timer = False
 timer_z = -1
+
 
 while running:
 
@@ -736,6 +752,8 @@ while running:
             player.flag_sk = True
             timer = False
             timer_z = -1
+
+
 
 
 
