@@ -11,6 +11,130 @@ clock = pygame.time.Clock()
 FPS = 60
 STEP = 3
 
+class Boss(pygame.sprite.Sprite):
+    def __init__(self, sheet, columns, rows, x, y, damage, life, speed):
+        super().__init__(all_sprites, monster_gr)
+        self.frames = []
+        self.cut_sheet(sheet, columns, rows)
+        self.cur_frame = 0
+        self.image = self.frames[self.cur_frame]
+        self.rect = self.rect.move(x, y)
+        self.xd2 = x
+        self.yd2 = y
+        self.x = x
+        self.y = y
+        self.speed = speed
+        self.life = life
+        self.damage = damage
+        self.check_update = 0
+        self.mask = pygame.mask.from_surface(self.image)
+
+    def cut_sheet(self, sheet, columns, rows):
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
+                                sheet.get_height() // rows)
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                self.frames.append(sheet.subsurface(pygame.Rect(
+                    frame_location, self.rect.size)))
+
+    def move_towards_player(self, player):
+        global timer
+        dx, dy = player.rect.x - self.rect.x, player.rect.y - self.rect.y
+        dist = math.hypot(dx, dy) + 1
+        dx, dy = dx / dist, dy / dist
+
+        px, py = player.coord()
+        dx2, dy2 = px - self.xd2, py - self.yd2
+        dist2 = math.hypot(dx2, dy2) + 1
+        coll = pygame.sprite.groupcollide(monster_gr, wall_group, False, False,
+                                          collided=pygame.sprite.collide_mask)
+        coll1 = pygame.sprite.groupcollide(monster_gr, table_group, False, False,
+                                           collided=pygame.sprite.collide_mask)
+        coll2 = pygame.sprite.groupcollide(monster_gr, door_group, False, False,
+                                           collided=pygame.sprite.collide_mask)
+        coll3 = pygame.sprite.groupcollide(player_group, monster_gr, False, False,
+                                           collided=pygame.sprite.collide_rect)
+        coll4 = pygame.sprite.groupcollide(player_group, monster_gr, False, False,
+                                           collided=pygame.sprite.collide_mask)
+
+        if abs(dist2) < 200:
+            if coll or coll1 or coll2:
+                self.rect.x -= dx * 2
+                self.rect.y -= dy * 2
+                self.x -= dx * 2
+                self.y -= dy * 2
+            if coll3:
+                if player.fight == 1:
+                    self.del_life(player.damage)
+                    print(self.life)
+                    player.damage = 0
+                    if self.life <= 0:
+                        pygame.sprite.Sprite.kill(self)
+                        print("u kill boss")
+                        player.add_money(random.choice((100, 100, 100, 150, 200)))
+                        player.add_key("bosskey")
+
+            if coll4:
+                if player.flag_sk:
+                    player.flag_sk = False
+                    if pygame.sprite.groupcollide(player_group, monster_gr, False, False,
+                                                       collided=pygame.sprite.collide_mask):
+                        player.del_life(self.damage)
+                        print(player.life)
+                        timer = True
+                        """
+                        if player.life <= 0:
+                            if player.life_count > 0:
+                                player.life_count -= 1
+                                player.rect.x = 100
+                                player.x = 100
+                                player.rect.y = 100
+                                player.y = 100
+                        """
+
+
+                else:
+                    timer = True
+
+
+
+            else:
+                self.rect.x += dx * 2
+                self.rect.y += dy * 2
+                self.x += dx * 2
+                self.y += dy * 2
+        if dx < 0:
+            self.change(load_image('skeletonL.png'), 4, 1, self.rect.x, self.rect.y)
+        else:
+            self.change(load_image('skeleton.png'), 4, 1, self.rect.x, self.rect.y)
+
+    def update(self):
+        self.check_update += 1
+        self.move_towards_player(player)
+        if self.check_update % 30 == 0:
+            self.cur_frame = (self.cur_frame + 1) % len(self.frames)
+            self.image = self.frames[self.cur_frame]
+
+    def change(self, sheet, columns, rows, x, y):
+        self.frames = []
+        self.cut_sheet(sheet, columns, rows)
+        self.cur_frame %= 4
+        self.image = self.frames[self.cur_frame]
+        self.rect = self.rect.move(x, y)
+
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                self.frames.append(sheet.subsurface(pygame.Rect(
+                    frame_location, self.rect.size)))
+
+    def del_life(self, num):
+        self.life -= num
+
+    def add_life(self, num):
+        self.life += num
+
 
 class Skeleton(pygame.sprite.Sprite):
     def __init__(self, sheet, columns, rows, x, y):
@@ -571,6 +695,7 @@ def generate_level(level):
                 skelet = Skeleton(load_image("skeleton.png"), 4, 1, 350, 400)
                 skelet = Skeleton(load_image("skeleton.png"), 4, 1, 700, 100)
                 skelet = Skeleton(load_image("skeleton.png"), 4, 1, 700, 400)
+                boss = Boss(load_image("skeleton.png"), 4, 1, 1500, 400, 20, 1000, 0)
             elif level[y][x] == 'Y':
                 Tile('door', x, y)
                 door = Door(x * 50, y * 50, "Y")
@@ -752,6 +877,9 @@ while running:
             player.flag_sk = True
             timer = False
             timer_z = -1
+    if player.life < 95:
+        if pygame.time.get_ticks() % 5000 == 1:
+            player.add_life(5)
 
 
 
