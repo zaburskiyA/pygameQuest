@@ -24,7 +24,10 @@ class Skeleton(pygame.sprite.Sprite):
         self.yd2 = y
         self.x = x
         self.y = y
+        self.life = 100
+        self.damage = 5
         self.check_update = 0
+        self.mask = pygame.mask.from_surface(self.image)
 
     def cut_sheet(self, sheet, columns, rows):
         self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
@@ -36,7 +39,7 @@ class Skeleton(pygame.sprite.Sprite):
                     frame_location, self.rect.size)))
 
     def move_towards_player(self, player):
-
+        global timer
         dx, dy = player.rect.x - self.rect.x, player.rect.y - self.rect.y
         dist = math.hypot(dx, dy) + 1
         dx, dy = dx / dist, dy / dist
@@ -44,12 +47,15 @@ class Skeleton(pygame.sprite.Sprite):
         px, py = player.coord()
         dx2, dy2 = px - self.xd2, py - self.yd2
         dist2 = math.hypot(dx2, dy2) + 1
-
         coll = pygame.sprite.groupcollide(monster_gr, wall_group, False, False,
                                           collided=pygame.sprite.collide_mask)
         coll1 = pygame.sprite.groupcollide(monster_gr, table_group, False, False,
                                            collided=pygame.sprite.collide_mask)
         coll2 = pygame.sprite.groupcollide(monster_gr, door_group, False, False,
+                                           collided=pygame.sprite.collide_mask)
+        coll3 = pygame.sprite.groupcollide(player_group, monster_gr, False, False,
+                                           collided=pygame.sprite.collide_rect)
+        coll4 = pygame.sprite.groupcollide(player_group, monster_gr, False, False,
                                            collided=pygame.sprite.collide_mask)
 
         if abs(dist2) < 200:
@@ -58,6 +64,29 @@ class Skeleton(pygame.sprite.Sprite):
                 self.rect.y -= dy * 2
                 self.x -= dx * 2
                 self.y -= dy * 2
+            if coll3:
+                if player.fight == 1:
+                    self.del_life(player.damage)
+                    print(self.life)
+                    player.damage = 0
+                    if self.life <= 0:
+                        pygame.sprite.Sprite.kill(self)
+                        print("u kill skeleton")
+                        player.add_money(random.choice((10, 10, 10, 15, 20)))
+
+            if coll4:
+                if player.flag_sk:
+                    player.flag_sk = False
+                    if pygame.sprite.groupcollide(player_group, monster_gr, False, False,
+                                                       collided=pygame.sprite.collide_mask):
+                        player.del_life(self.damage)
+                        print(player.life)
+                        timer = True
+                else:
+                    timer = True
+
+
+
             else:
                 self.rect.x += dx * 2
                 self.rect.y += dy * 2
@@ -88,6 +117,12 @@ class Skeleton(pygame.sprite.Sprite):
                 self.frames.append(sheet.subsurface(pygame.Rect(
                     frame_location, self.rect.size)))
 
+    def del_life(self, num):
+        self.life -= num
+
+    def add_life(self, num):
+        self.life += num
+
 
 class AnimatedSprite(pygame.sprite.Sprite):
     def __init__(self, sheet, columns, rows, x, y):
@@ -99,13 +134,18 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.rect = self.rect.move(x, y)
         self.check_frame = 0
         self.mask = pygame.mask.from_surface(self.image)
+        self.mask2 = pygame.mask.from_surface(self.image)
         self.rkey = 10
         self.ykey = 10
         self.bkey = 10
         self.bosskey = 0
         self.Money = 0
+        self.life = 100
+        self.damage = 20
+        self.fight = 0
         self.x = x
         self.y = y
+        self.flag_sk = False
 
     def change(self, sheet, columns, rows, x, y):
         self.frames = []
@@ -141,8 +181,12 @@ class AnimatedSprite(pygame.sprite.Sprite):
                                            collided=pygame.sprite.collide_mask)
         coll2 = pygame.sprite.groupcollide(player_group, door_group, False, False,
                                            collided=pygame.sprite.collide_mask)
+        coll3 = pygame.sprite.groupcollide(player_group, monster_gr, False, False,
+                                           collided=pygame.sprite.collide_rect)
         if coll or coll1 or coll2:
             return True
+        elif coll3:
+            pass
         else:
             return False
 
@@ -193,6 +237,18 @@ class AnimatedSprite(pygame.sprite.Sprite):
     def coord(self):
         return self.x, self.y
 
+    def del_life(self, num):
+        self.life -= num
+
+    def add_life(self, num):
+        self.life += num
+
+    def fight_flag(self, flag):
+        if flag:
+            self.fight = 1
+        else:
+            self.fight = 0
+
 
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)
@@ -206,6 +262,11 @@ def load_image(name, colorkey=None):
         image.set_colorkey(colorkey)
     image = image.convert_alpha()
     return image
+
+
+def wait(second, now):
+    return pygame.time.get_ticks() - now > second * 1000 - 100 and \
+           pygame.time.get_ticks() - now < second * 1000 + 100
 
 
 def terminate():
@@ -534,6 +595,7 @@ def generate_level(level):
     return new_player, x, y
 
 
+
 def start_screen():
     intro_text = ["ЗАСТАВКА", "",
                   "Правила игры",
@@ -569,6 +631,8 @@ running = True
 keypress = None
 camera = Camera()
 watch = "d"
+timer = False
+timer_z = -1
 
 while running:
 
@@ -592,6 +656,8 @@ while running:
                 keypress = "f"
         elif event.type == pygame.KEYUP:
             keypress = None
+            player.fight_flag(False)
+            player.damage = 20
     if keypress == "r":
         player.rect.x += STEP
         player.change(load_image("player_R_inv.png"), 4, 1, player.rect.x, player.rect.y)
@@ -630,6 +696,7 @@ while running:
             player.y -= STEP
 
     if keypress == "f":
+        player.fight_flag(True)
         if watch == "r":
             player.rect.x += 1
             player.x += 1
@@ -662,6 +729,16 @@ while running:
             if collis:
                 player.rect.y -= 1
                 player.y -= 1
+    if timer:
+        if timer_z == -1:
+            timer_z = pygame.time.get_ticks()
+        if wait(2, timer_z):
+            player.flag_sk = True
+            timer = False
+            timer_z = -1
+
+
+
     monster_gr.update()
     screen.fill((0, 0, 0))
     all_sprites.draw(screen)
@@ -673,5 +750,6 @@ while running:
     # обновляем положение всех спрайтов
     for sprite in all_sprites:
         camera.apply(sprite)
+
 
 pygame.quit()
