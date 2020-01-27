@@ -13,7 +13,7 @@ STEP = 3
 
 
 class Boss(pygame.sprite.Sprite):
-    def __init__(self, sheet, columns, rows, x, y, damage, life, speed, num_boss):
+    def __init__(self, sheet, columns, rows, x, y, damage, life, speed, num_boss, region=350):
         super().__init__(all_sprites, monster_gr)
         self.frames = []
         self.cut_sheet(sheet, columns, rows)
@@ -21,6 +21,7 @@ class Boss(pygame.sprite.Sprite):
         self.image = self.frames[self.cur_frame]
         self.rect = self.rect.move(x, y)
         self.xd2 = x
+        self.region = region
         self.yd2 = y
         self.x = x
         self.y = y
@@ -60,12 +61,13 @@ class Boss(pygame.sprite.Sprite):
         coll4 = pygame.sprite.groupcollide(player_group, monster_gr, False, False,
                                            collided=pygame.sprite.collide_mask)
 
-        if abs(dist2) < 350 or abs(dist) < 150:
+        if abs(dist2) < self.region or abs(dist) < 150:
             if coll or coll1 or coll2:
-                self.rect.x -= dx * 2
-                self.rect.y -= dy * 2
-                self.x -= dx * 2
-                self.y -= dy * 2
+                if self.num_boss != 2:
+                    self.rect.x -= dx * 2
+                    self.rect.y -= dy * 2
+                    self.x -= dx * 2
+                    self.y -= dy * 2
             if dist < 70:
                 if player.fight == 1:
                     self.del_life(player.damage)
@@ -108,9 +110,14 @@ class Boss(pygame.sprite.Sprite):
         if dx < 0:
             if self.num_boss == 1:
                 self.change(load_image('fBossL.png'), 4, 1, self.rect.x, self.rect.y)
+            elif self.num_boss == 2:
+                self.change(load_image('sBossL.png'), 4, 1, self.rect.x, self.rect.y)
+
         else:
             if self.num_boss == 1:
                 self.change(load_image('fBossR.png'), 4, 1, self.rect.x, self.rect.y)
+            elif self.num_boss == 2:
+                self.change(load_image('sBossL.png'), 4, 1, self.rect.x, self.rect.y)
 
     def update(self):
         global kill
@@ -771,7 +778,7 @@ def generate_level(level, numlvl):
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 100, 100)
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 500, 700)
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 1600, 700)
-                    boss = Boss(load_image("skeleton.png"), 4, 1, 1000, 400, 20, 1000, 0, 1)
+                    boss = Boss(load_image("skeleton.png"), 4, 1, 800, 400, 20, 1000, 0, 2, region=200)
             elif level[y][x] == 'Y':
                 door = Door(x * 50, y * 50, "Y")
             elif level[y][x] == '=':
