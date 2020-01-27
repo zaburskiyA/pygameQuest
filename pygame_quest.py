@@ -12,7 +12,7 @@ FPS = 60
 STEP = 3
 
 class Boss(pygame.sprite.Sprite):
-    def __init__(self, sheet, columns, rows, x, y, damage, life, speed):
+    def __init__(self, sheet, columns, rows, x, y, damage, life, speed, num_boss):
         super().__init__(all_sprites, monster_gr)
         self.frames = []
         self.cut_sheet(sheet, columns, rows)
@@ -28,6 +28,7 @@ class Boss(pygame.sprite.Sprite):
         self.damage = damage
         self.check_update = 0
         self.mask = pygame.mask.from_surface(self.image)
+        self.num_boss = num_boss
 
     def cut_sheet(self, sheet, columns, rows):
         self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
@@ -58,21 +59,21 @@ class Boss(pygame.sprite.Sprite):
         coll4 = pygame.sprite.groupcollide(player_group, monster_gr, False, False,
                                            collided=pygame.sprite.collide_mask)
 
-        if abs(dist2) < 200:
+        if abs(dist2) < 200 or abs(dist) < 100:
             if coll or coll1 or coll2:
                 self.rect.x -= dx * 2
                 self.rect.y -= dy * 2
                 self.x -= dx * 2
                 self.y -= dy * 2
-            if coll3:
+            if dist < 70:
                 if player.fight == 1:
                     self.del_life(player.damage)
-                    print(self.life)
+                    print("здоровье скелета", self.life)
                     player.damage = 0
                     if self.life <= 0:
                         pygame.sprite.Sprite.kill(self)
-                        print("u kill boss")
-                        player.add_money(random.choice((100, 100, 100, 150, 200)))
+                        print("u kill skeleton")
+                        player.add_money(random.choice((10, 10, 10, 15, 20)))
                         player.add_key("bosskey")
 
             if coll4:
@@ -82,6 +83,10 @@ class Boss(pygame.sprite.Sprite):
                                                        collided=pygame.sprite.collide_mask):
                         player.del_life(self.damage)
                         print(player.life)
+                        self.rect.x -= dx * 2
+                        self.rect.y -= dy * 2
+                        self.x -= dx * 2
+                        self.y -= dy * 2
                         timer = True
                         """
                         if player.life <= 0:
@@ -92,22 +97,19 @@ class Boss(pygame.sprite.Sprite):
                                 player.rect.y = 100
                                 player.y = 100
                         """
-
-
                 else:
                     timer = True
-
-
-
             else:
                 self.rect.x += dx * 2
                 self.rect.y += dy * 2
                 self.x += dx * 2
                 self.y += dy * 2
         if dx < 0:
-            self.change(load_image('skeletonL.png'), 4, 1, self.rect.x, self.rect.y)
+            if self.num_boss == 1:
+                self.change(load_image('fBossL.png'), 4, 1, self.rect.x, self.rect.y)
         else:
-            self.change(load_image('skeleton.png'), 4, 1, self.rect.x, self.rect.y)
+            if self.num_boss == 1:
+                self.change(load_image('fBossR.png'), 4, 1, self.rect.x, self.rect.y)
 
     def update(self):
         self.check_update += 1
@@ -182,16 +184,16 @@ class Skeleton(pygame.sprite.Sprite):
         coll4 = pygame.sprite.groupcollide(player_group, monster_gr, False, False,
                                            collided=pygame.sprite.collide_mask)
 
-        if abs(dist2) < 200:
+        if abs(dist2) < 200 or abs(dist) < 70:
             if coll or coll1 or coll2:
                 self.rect.x -= dx * 2
                 self.rect.y -= dy * 2
                 self.x -= dx * 2
                 self.y -= dy * 2
-            if coll3:
+            if dist < 70:
                 if player.fight == 1:
                     self.del_life(player.damage)
-                    print(self.life)
+                    print("здоровье скелета", self.life)
                     player.damage = 0
                     if self.life <= 0:
                         pygame.sprite.Sprite.kill(self)
@@ -204,7 +206,11 @@ class Skeleton(pygame.sprite.Sprite):
                     if pygame.sprite.groupcollide(player_group, monster_gr, False, False,
                                                        collided=pygame.sprite.collide_mask):
                         player.del_life(self.damage)
-                        print(player.life)
+                        print("здоровье игрока", player.life)
+                        self.rect.x -= dx * 2
+                        self.rect.y -= dy * 2
+                        self.x -= dx * 2
+                        self.y -= dy * 2
                         timer = True
                         """
                         if player.life <= 0:
@@ -676,7 +682,7 @@ door_group = pygame.sprite.Group()
 monster_gr = pygame.sprite.Group()
 
 
-def generate_level(level):
+def generate_level(level, numlvl):
     new_player, x, y = None, None, None
     for y in range(len(level)):
         for x in range(len(level[y])):
@@ -691,11 +697,12 @@ def generate_level(level):
                 Tile('empty', x, y)
             elif level[y][x] == '@':
                 Tile('wall', x, y)
-                new_player = AnimatedSprite(load_image("player_D_inv.png"), 4, 1, 100, 100)
-                skelet = Skeleton(load_image("skeleton.png"), 4, 1, 350, 400)
-                skelet = Skeleton(load_image("skeleton.png"), 4, 1, 700, 100)
-                skelet = Skeleton(load_image("skeleton.png"), 4, 1, 700, 400)
-                boss = Boss(load_image("skeleton.png"), 4, 1, 1500, 400, 20, 1000, 0)
+                if numlvl == 1:
+                    new_player = AnimatedSprite(load_image("player_D_inv.png"), 4, 1, 100, 100)
+                    skelet = Skeleton(load_image("skeleton.png"), 4, 1, 350, 400)
+                    skelet = Skeleton(load_image("skeleton.png"), 4, 1, 700, 100)
+                    skelet = Skeleton(load_image("skeleton.png"), 4, 1, 700, 400)
+                    boss = Boss(load_image("skeleton.png"), 4, 1, 1500, 400, 20, 1000, 0)
             elif level[y][x] == 'Y':
                 Tile('door', x, y)
                 door = Door(x * 50, y * 50, "Y")
@@ -726,6 +733,12 @@ def generate_level(level):
             elif level[y][x] == 's':
                 Tile('Nstand', x, y)
                 Nstand = Nightstand(x * 50, y * 50, Money=random.choice((0, 0, 10)), ykey=True)
+            elif level[y][x] == '-':
+                Tile('Nstand', x, y)
+                Nstand = Nightstand(x * 50, y * 50, Money=random.choice((0, 0, 10)), bkey=True)
+            elif level[y][x] == '%':
+                Tile('Nstand', x, y)
+                Nstand = Nightstand(x * 50, y * 50, Money=random.choice((0, 0, 10)), rkey=True)
             elif level[y][x] == '*':
                 Tile('ladder', x, y)
             elif level[y][x] == '2':
@@ -766,7 +779,7 @@ def start_screen():
 
 
 start_screen()
-player, level_x, level_y = generate_level(load_level('карта.txt'))
+player, level_x, level_y = generate_level(load_level('карта.txt'), 1)
 running = True
 keypress = None
 camera = Camera()
@@ -839,32 +852,24 @@ while running:
     if keypress == "f":
         player.fight_flag(True)
         if watch == "r":
-            player.rect.x += 1
-            player.x += 1
             player.change(load_image("hitR.png"), 4, 1, player.rect.x, player.rect.y)
             collis = player.update()
             if collis:
                 player.rect.x -= 1
                 player.x -= 1
         elif watch == "l":
-            player.rect.x -= 1
-            player.x -= 1
             player.change(load_image("hitL.png"), 4, 1, player.rect.x, player.rect.y)
             collis = player.update()
             if collis:
                 player.rect.x += 1
                 player.x += 1
         elif watch == "u":
-            player.rect.y -= 1
-            player.y -= 1
             player.change(load_image("hitU.png"), 4, 1, player.rect.x, player.rect.y)
             collis = player.update()
             if collis:
                 player.rect.y += 1
                 player.y -= 1
         elif watch == "d":
-            player.rect.y += 1
-            player.y += 1
             player.change(load_image("hitD.png"), 4, 1, player.rect.x, player.rect.y)
             collis = player.update()
             if collis:
