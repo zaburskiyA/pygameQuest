@@ -64,10 +64,10 @@ class Boss(pygame.sprite.Sprite):
         if abs(dist2) < self.region or abs(dist) < 150:
             if coll or coll1 or coll2:
                 if self.num_boss != 2:
-                    self.rect.x -= dx * 2
-                    self.rect.y -= dy * 2
-                    self.x -= dx * 2
-                    self.y -= dy * 2
+                    self.rect.x -= dx * 2 * self.speed
+                    self.rect.y -= dy * 2 * self.speed
+                    self.x -= dx * 2 * self.speed
+                    self.y -= dy * 2 * self.speed
             if dist < 70:
                 if player.fight == 1:
                     self.del_life(player.damage)
@@ -86,10 +86,10 @@ class Boss(pygame.sprite.Sprite):
                                                   collided=pygame.sprite.collide_mask):
                         player.del_life(self.damage)
                         print(player.life)
-                        self.rect.x -= dx * 2
-                        self.rect.y -= dy * 2
-                        self.x -= dx * 2
-                        self.y -= dy * 2
+                        self.rect.x -= dx * 2 * self.speed
+                        self.rect.y -= dy * 2 * self.speed
+                        self.x -= dx * 2 * self.speed
+                        self.y -= dy * 2 * self.speed
                         timer = True
                         """
                         if player.life <= 0:
@@ -103,10 +103,10 @@ class Boss(pygame.sprite.Sprite):
                 else:
                     timer = True
             else:
-                self.rect.x += dx * 2
-                self.rect.y += dy * 2
-                self.x += dx * 2
-                self.y += dy * 2
+                self.rect.x += dx * 2 * self.speed
+                self.rect.y += dy * 2 * self.speed
+                self.x += dx * 2 * self.speed
+                self.y += dy * 2 * self.speed
         if dx < 0:
             if self.num_boss == 1:
                 self.change(load_image('fBossL.png'), 4, 1, self.rect.x, self.rect.y)
@@ -770,7 +770,7 @@ def generate_level(level, numlvl):
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 700, 100)
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 700, 400)
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 500, 700)
-                    boss = Boss(load_image("skeleton.png"), 4, 1, 1500, 400, 20, 1000, 0, 1)
+                    boss = Boss(load_image("skeleton.png"), 4, 1, 1500, 400, 20, 1000, 1, 1)
                 if numlvl == 2:
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 100, 450)
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 300, 450)
@@ -778,7 +778,7 @@ def generate_level(level, numlvl):
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 100, 100)
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 500, 700)
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 1600, 700)
-                    boss = Boss(load_image("skeleton.png"), 4, 1, 800, 400, 20, 1000, 0, 2, region=200)
+                    boss = Boss(load_image("skeleton.png"), 4, 1, 800, 400, 25, 900, 1, 2, region=200)
             elif level[y][x] == 'Y':
                 door = Door(x * 50, y * 50, "Y")
             elif level[y][x] == '=':
@@ -822,6 +822,16 @@ def kill_all():
     ladder_gr.update()
     grass_gr.update()
     kill = False
+
+
+def information():  # TODO
+    intro_text = ["Здоровье:", player.life,
+                  "Количество жизней:", player.life_count,
+                  "Жёлтых ключей:", player.ykey,
+                  "Синих ключей:", player.bkey,
+                  "Красных ключей:", player.rkey,
+                  "Босс ключей:", player.bosskey,
+                  "Монет:", player.Money]
 
 
 def start_screen():
@@ -885,6 +895,8 @@ while running:
                 keypress = "d"
             elif event.key == 102:
                 keypress = "f"
+            elif event.key == 9:
+                keypress = "tab"
         elif event.type == pygame.KEYUP:
             keypress = None
             player.fight_flag(False)
@@ -925,6 +937,8 @@ while running:
         if collis:
             player.rect.y -= STEP
             player.y -= STEP
+    if keypress == "tab":  # TODO
+        pass
 
     if keypress == "f":
         player.fight_flag(True)
