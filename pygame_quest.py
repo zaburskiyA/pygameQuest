@@ -154,7 +154,7 @@ class Skeleton(pygame.sprite.Sprite):
         self.yd2 = y
         self.x = x
         self.y = y
-        self.life = 100
+        self.life = 150
         self.damage = 5
         self.check_update = 0
         self.mask = pygame.mask.from_surface(self.image)
@@ -320,7 +320,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
                     frame_location, self.rect.size)))
 
     def update(self):
-        global kill, level_x, level_y
+        global kill, level_x, level_y, lvl
         if kill:
             pygame.sprite.Sprite.kill(self)
         self.check_frame += 1
@@ -339,12 +339,13 @@ class AnimatedSprite(pygame.sprite.Sprite):
             return True
         elif coll3:
             kill_all()
-            level_x, level_y = generate_level(load_level('карта2.txt'), 2)
-            self.rect.x = 1650
-            self.x = 1650
-            self.rect.y = 50
-            self.y = 50
-
+            if lvl == 1:
+                level_x, level_y = generate_level(load_level('карта2.txt'), 2)
+                self.rect.x = 1650
+                self.x = 1650
+                self.rect.y = 50
+                self.y = 50
+                lvl += 1
         else:
             return False
 
@@ -638,11 +639,24 @@ class Ladder(pygame.sprite.Sprite):
     image = load_image("ladder.png")
 
     def __init__(self, x, y):
-        """x, y - координаты верхнего левого угла картинки
-        col - это цвет двери
-        open - открыта или закрыта дверь. по умолчанию False"""
         super().__init__(all_sprites, ladder_gr)
         self.image = Ladder.image
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
+    def update(self):
+        global kill
+        if kill:
+            pygame.sprite.Sprite.kill(self)
+
+
+class Grass(pygame.sprite.Sprite):
+    image = load_image("grass.png")
+
+    def __init__(self, x, y):
+        super().__init__(all_sprites, grass_gr)
+        self.image = Grass.image
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -729,6 +743,7 @@ table_group = pygame.sprite.Group()
 door_group = pygame.sprite.Group()
 monster_gr = pygame.sprite.Group()
 ladder_gr = pygame.sprite.Group()
+grass_gr = pygame.sprite.Group()
 
 
 def generate_level(level, numlvl):
@@ -736,65 +751,55 @@ def generate_level(level, numlvl):
     for y in range(len(level)):
         for x in range(len(level[y])):
             if level[y][x] == '#':
-                Tile('wall', x, y)
                 wall = Wall(x * 50, y * 50, x * 50 + 50, y * 50 + 50)
             elif level[y][x] == '.':
-                Tile('empty', x, y)
+                grass = Grass(x * 50, y * 50)
             elif level[y][x] == '1':
-                Tile('empty', x, y)
+                grass = Grass(x * 50, y * 50)
             elif level[y][x] == '@':
-                Tile('wall', x, y)
+                wall = Wall(x * 50, y * 50, x * 50 + 50, y * 50 + 50)
                 if numlvl == 1:
-                    # new_player = AnimatedSprite(load_image("player_D_inv.png"), 4, 1, 100, 100, rkey=10, ykey=10,
-                    #                           bkey=10)
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 350, 400)
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 700, 100)
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 700, 400)
+                    skelet = Skeleton(load_image("skeleton.png"), 4, 1, 500, 700)
                     boss = Boss(load_image("skeleton.png"), 4, 1, 1500, 400, 20, 1000, 0, 1)
                 if numlvl == 2:
-                    pass
-                    # new_player = AnimatedSprite(load_image("player_D_inv.png"), 4, 1, 1650, 50)
+                    skelet = Skeleton(load_image("skeleton.png"), 4, 1, 100, 450)
+                    skelet = Skeleton(load_image("skeleton.png"), 4, 1, 300, 450)
+                    skelet = Skeleton(load_image("skeleton.png"), 4, 1, 300, 700)
+                    skelet = Skeleton(load_image("skeleton.png"), 4, 1, 100, 100)
+                    skelet = Skeleton(load_image("skeleton.png"), 4, 1, 500, 700)
+                    skelet = Skeleton(load_image("skeleton.png"), 4, 1, 1600, 700)
+                    boss = Boss(load_image("skeleton.png"), 4, 1, 1000, 400, 20, 1000, 0, 1)
             elif level[y][x] == 'Y':
-                Tile('door', x, y)
                 door = Door(x * 50, y * 50, "Y")
             elif level[y][x] == '=':
-                Tile('door', x, y)
                 door = Door(x * 50, y * 50, "Boss")
             elif level[y][x] == 'B':
-                Tile('door', x, y)
                 door = Door(x * 50, y * 50, "B")
             elif level[y][x] == 'R':
-                Tile('door', x, y)
                 door = Door(x * 50, y * 50, "R")
             elif level[y][x] == '&':
-                Tile('table', x, y)
                 table = Table(x * 50, y * 50, Money=random.choice((0, 0, 10)), ykey=True)
             elif level[y][x] == '+':
-                Tile('table', x, y)
                 table = Table(x * 50, y * 50, Money=random.choice((0, 0, 10)), rkey=True)
             elif level[y][x] == '$':
-                Tile('table', x, y)
                 table = Table(x * 50, y * 50, Money=random.choice((0, 0, 10)), bkey=True)
             elif level[y][x] == 't':
-                Tile('table', x, y)
                 table = Table(x * 50, y * 50, Money=random.choice((0, 0, 10)))
             elif level[y][x] == 'c':
-                Tile('Nstand', x, y)
                 Nstand = Nightstand(x * 50, y * 50, Money=random.choice((0, 0, 10)))
             elif level[y][x] == 's':
-                Tile('Nstand', x, y)
                 Nstand = Nightstand(x * 50, y * 50, Money=random.choice((0, 0, 10)), ykey=True)
             elif level[y][x] == '-':
-                Tile('Nstand', x, y)
                 Nstand = Nightstand(x * 50, y * 50, Money=random.choice((0, 0, 10)), bkey=True)
             elif level[y][x] == '%':
-                Tile('Nstand', x, y)
                 Nstand = Nightstand(x * 50, y * 50, Money=random.choice((0, 0, 10)), rkey=True)
             elif level[y][x] == '*':
-                Tile('ladder', x, y)
                 ladder = Ladder(x * 50, y * 50)
             elif level[y][x] == '2':
-                Tile('empty', x, y)
+                grass = Grass(x * 50, y * 50)
 
     # вернем игрока, а также размер поля в клетках
     return x, y
@@ -808,6 +813,7 @@ def kill_all():
     wall_group.update()
     monster_gr.update()
     ladder_gr.update()
+    grass_gr.update()
     kill = False
 
 
@@ -841,7 +847,7 @@ def start_screen():
 
 
 start_screen()
-player = AnimatedSprite(load_image("player_D_inv.png"), 4, 1, 100, 100, rkey=10, ykey=10, bkey=10)
+player = AnimatedSprite(load_image("player_D_inv.png"), 4, 1, 100, 100, rkey=10, ykey=10, bkey=10, bosskey=1)
 level_x, level_y = generate_level(load_level('карта.txt'), 1)
 running = True
 keypress = None
