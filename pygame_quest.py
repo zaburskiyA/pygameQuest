@@ -59,7 +59,7 @@ class Boss(pygame.sprite.Sprite):
         coll4 = pygame.sprite.groupcollide(player_group, monster_gr, False, False,
                                            collided=pygame.sprite.collide_mask)
 
-        if abs(dist2) < 200 or abs(dist) < 100:
+        if abs(dist2) < 350 or abs(dist) < 150:
             if coll or coll1 or coll2:
                 self.rect.x -= dx * 2
                 self.rect.y -= dy * 2
@@ -68,11 +68,11 @@ class Boss(pygame.sprite.Sprite):
             if dist < 70:
                 if player.fight == 1:
                     self.del_life(player.damage)
-                    print("здоровье скелета", self.life)
+                    print("здоровье босса", self.life)
                     player.damage = 0
                     if self.life <= 0:
                         pygame.sprite.Sprite.kill(self)
-                        print("u kill skeleton")
+                        print("u kill boss")
                         player.add_money(random.choice((10, 10, 10, 15, 20)))
                         player.add_key("bosskey")
 
@@ -702,7 +702,7 @@ def generate_level(level, numlvl):
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 350, 400)
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 700, 100)
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 700, 400)
-                    boss = Boss(load_image("skeleton.png"), 4, 1, 1500, 400, 20, 1000, 0)
+                    boss = Boss(load_image("skeleton.png"), 4, 1, 1500, 400, 20, 1000, 0, 1)
             elif level[y][x] == 'Y':
                 Tile('door', x, y)
                 door = Door(x * 50, y * 50, "Y")
