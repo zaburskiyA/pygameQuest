@@ -11,6 +11,7 @@ clock = pygame.time.Clock()
 FPS = 60
 STEP = 3
 
+
 class Boss(pygame.sprite.Sprite):
     def __init__(self, sheet, columns, rows, x, y, damage, life, speed, num_boss):
         super().__init__(all_sprites, monster_gr)
@@ -80,7 +81,7 @@ class Boss(pygame.sprite.Sprite):
                 if player.flag_sk:
                     player.flag_sk = False
                     if pygame.sprite.groupcollide(player_group, monster_gr, False, False,
-                                                       collided=pygame.sprite.collide_mask):
+                                                  collided=pygame.sprite.collide_mask):
                         player.del_life(self.damage)
                         print(player.life)
                         self.rect.x -= dx * 2
@@ -112,11 +113,14 @@ class Boss(pygame.sprite.Sprite):
                 self.change(load_image('fBossR.png'), 4, 1, self.rect.x, self.rect.y)
 
     def update(self):
+        global kill
         self.check_update += 1
         self.move_towards_player(player)
         if self.check_update % 30 == 0:
             self.cur_frame = (self.cur_frame + 1) % len(self.frames)
             self.image = self.frames[self.cur_frame]
+        if kill:
+            pygame.sprite.Sprite.kill(self)
 
     def change(self, sheet, columns, rows, x, y):
         self.frames = []
@@ -204,7 +208,7 @@ class Skeleton(pygame.sprite.Sprite):
                 if player.flag_sk:
                     player.flag_sk = False
                     if pygame.sprite.groupcollide(player_group, monster_gr, False, False,
-                                                       collided=pygame.sprite.collide_mask):
+                                                  collided=pygame.sprite.collide_mask):
                         player.del_life(self.damage)
                         print("здоровье игрока", player.life)
                         self.rect.x -= dx * 2
@@ -239,11 +243,14 @@ class Skeleton(pygame.sprite.Sprite):
             self.change(load_image('skeleton.png'), 4, 1, self.rect.x, self.rect.y)
 
     def update(self):
+        global kill
         self.check_update += 1
         self.move_towards_player(player)
         if self.check_update % 30 == 0:
             self.cur_frame = (self.cur_frame + 1) % len(self.frames)
             self.image = self.frames[self.cur_frame]
+        if kill:
+            pygame.sprite.Sprite.kill(self)
 
     def change(self, sheet, columns, rows, x, y):
         self.frames = []
@@ -266,7 +273,7 @@ class Skeleton(pygame.sprite.Sprite):
 
 
 class AnimatedSprite(pygame.sprite.Sprite):
-    def __init__(self, sheet, columns, rows, x, y):
+    def __init__(self, sheet, columns, rows, x, y, rkey=0, ykey=0, bkey=0, bosskey=0, money=0, life_count=1, life=100):
         super().__init__(all_sprites, player_group)
         self.frames = []
         self.cut_sheet(sheet, columns, rows)
@@ -276,18 +283,18 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.check_frame = 0
         self.mask = pygame.mask.from_surface(self.image)
         self.mask2 = pygame.mask.from_surface(self.image)
-        self.rkey = 10
-        self.ykey = 10
-        self.bkey = 10
-        self.bosskey = 0
-        self.Money = 0
-        self.life = 100
+        self.rkey = rkey
+        self.ykey = ykey
+        self.bkey = bkey
+        self.bosskey = bosskey
+        self.Money = money
+        self.life = life
         self.damage = 20
         self.fight = 0
         self.x = x
         self.y = y
         self.flag_sk = False
-        self.life_count = 3
+        self.life_count = life_count
 
     def change(self, sheet, columns, rows, x, y):
         self.frames = []
@@ -313,6 +320,9 @@ class AnimatedSprite(pygame.sprite.Sprite):
                     frame_location, self.rect.size)))
 
     def update(self):
+        global kill, level_x, level_y
+        if kill:
+            pygame.sprite.Sprite.kill(self)
         self.check_frame += 1
         if self.check_frame % 40 == 0:
             self.cur_frame = (self.cur_frame + 1) % len(self.frames)
@@ -323,12 +333,18 @@ class AnimatedSprite(pygame.sprite.Sprite):
                                            collided=pygame.sprite.collide_mask)
         coll2 = pygame.sprite.groupcollide(player_group, door_group, False, False,
                                            collided=pygame.sprite.collide_mask)
-        coll3 = pygame.sprite.groupcollide(player_group, monster_gr, False, False,
+        coll3 = pygame.sprite.groupcollide(player_group, ladder_gr, False, False,
                                            collided=pygame.sprite.collide_rect)
         if coll or coll1 or coll2:
             return True
         elif coll3:
-            pass
+            kill_all()
+            level_x, level_y = generate_level(load_level('карта2.txt'), 2)
+            self.rect.x = 1650
+            self.x = 1650
+            self.rect.y = 50
+            self.y = 50
+
         else:
             return False
 
@@ -437,7 +453,6 @@ player_image = load_image('mar.png', -1)
 tile_width = tile_height = 50
 
 
-
 class Camera:
     # зададим начальный сдвиг камеры
     def __init__(self):
@@ -472,6 +487,11 @@ class Wall(pygame.sprite.Sprite):
         # вычисляем маску для эффективного сравнения
         self.mask = pygame.mask.from_surface(self.image)
 
+    def update(self):
+        global kill
+        if kill:
+            pygame.sprite.Sprite.kill(self)
+
 
 class Nightstand(pygame.sprite.Sprite):
     image = load_image("nightstand_close.png")
@@ -502,6 +522,7 @@ class Nightstand(pygame.sprite.Sprite):
             self.image = self.Mimage
 
     def update(self, plx, ply, *args):
+        global kill
         dist = sqrt((int(plx) - int(self.rect.x)) ** 2 + (int(ply) - int(self.rect.y)) ** 2) < 60  # флаг дистанция
         # проверяет дистанцию между объетом и игроком
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(args[0].pos) and dist:
@@ -513,7 +534,7 @@ class Nightstand(pygame.sprite.Sprite):
                     self.image = self.imageopenY
                     self.close = 1
                 elif self.bkey:
-                    self.image = self.imageopenY
+                    self.image = self.imageopenB
                     self.close = 1
                 else:
                     self.image = self.imageopen
@@ -535,6 +556,8 @@ class Nightstand(pygame.sprite.Sprite):
             elif self.close == 0:
                 self.image = self.imageclose
                 self.close = 2
+        if kill:
+            pygame.sprite.Sprite.kill(self)
 
 
 class Table(pygame.sprite.Sprite):
@@ -587,6 +610,7 @@ class Table(pygame.sprite.Sprite):
                 self.image = self.imageM
 
     def update(self, plx, ply, *args):
+        global kill
         dist = sqrt((int(plx) - int(self.rect.x)) ** 2 + (int(ply) - int(self.rect.y)) ** 2) < 60  # флаг дистанция
         # проверяет дистанцию между объетом и игроком
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(args[0].pos) and dist:
@@ -606,6 +630,27 @@ class Table(pygame.sprite.Sprite):
             print(player.check_key("b"))
             print(player.check_key("y"))
             print(player.check_money())
+        if kill:
+            pygame.sprite.Sprite.kill(self)
+
+
+class Ladder(pygame.sprite.Sprite):
+    image = load_image("ladder.png")
+
+    def __init__(self, x, y):
+        """x, y - координаты верхнего левого угла картинки
+        col - это цвет двери
+        open - открыта или закрыта дверь. по умолчанию False"""
+        super().__init__(all_sprites, ladder_gr)
+        self.image = Ladder.image
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
+    def update(self):
+        global kill
+        if kill:
+            pygame.sprite.Sprite.kill(self)
 
 
 class Door(pygame.sprite.Sprite):
@@ -640,6 +685,7 @@ class Door(pygame.sprite.Sprite):
             self.image = self.bossdoor
 
     def update(self, plx, ply, *args):
+        global kill
         dist = sqrt((int(plx) - int(self.rect.x)) ** 2 + (int(ply) - int(self.rect.y)) ** 2) < 60  # флаг дистанция
         # проверяет дистанцию между объетом и игроком
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(
@@ -664,6 +710,8 @@ class Door(pygame.sprite.Sprite):
                 self.open = True
                 self.image = self.openi
                 self.mask = pygame.mask.from_surface(self.emptmask)
+        if kill:
+            pygame.sprite.Sprite.kill(self)
 
     def chek_open(self):
         """проверяет открыта ли дверь, возвращает True/False"""
@@ -680,15 +728,14 @@ wall_group = pygame.sprite.Group()
 table_group = pygame.sprite.Group()
 door_group = pygame.sprite.Group()
 monster_gr = pygame.sprite.Group()
+ladder_gr = pygame.sprite.Group()
 
 
 def generate_level(level, numlvl):
     new_player, x, y = None, None, None
     for y in range(len(level)):
         for x in range(len(level[y])):
-            if level[y][x] == '-':
-                Tile('empty', x, y)
-            elif level[y][x] == '#':
+            if level[y][x] == '#':
                 Tile('wall', x, y)
                 wall = Wall(x * 50, y * 50, x * 50 + 50, y * 50 + 50)
             elif level[y][x] == '.':
@@ -698,11 +745,15 @@ def generate_level(level, numlvl):
             elif level[y][x] == '@':
                 Tile('wall', x, y)
                 if numlvl == 1:
-                    new_player = AnimatedSprite(load_image("player_D_inv.png"), 4, 1, 100, 100)
+                    # new_player = AnimatedSprite(load_image("player_D_inv.png"), 4, 1, 100, 100, rkey=10, ykey=10,
+                    #                           bkey=10)
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 350, 400)
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 700, 100)
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 700, 400)
                     boss = Boss(load_image("skeleton.png"), 4, 1, 1500, 400, 20, 1000, 0, 1)
+                if numlvl == 2:
+                    pass
+                    # new_player = AnimatedSprite(load_image("player_D_inv.png"), 4, 1, 1650, 50)
             elif level[y][x] == 'Y':
                 Tile('door', x, y)
                 door = Door(x * 50, y * 50, "Y")
@@ -741,12 +792,23 @@ def generate_level(level, numlvl):
                 Nstand = Nightstand(x * 50, y * 50, Money=random.choice((0, 0, 10)), rkey=True)
             elif level[y][x] == '*':
                 Tile('ladder', x, y)
+                ladder = Ladder(x * 50, y * 50)
             elif level[y][x] == '2':
                 Tile('empty', x, y)
 
     # вернем игрока, а также размер поля в клетках
-    return new_player, x, y
+    return x, y
 
+
+def kill_all():
+    global kill
+    kill = True
+    door_group.update(player.rect.x, player.rect.y)
+    table_group.update(player.rect.x, player.rect.y)
+    wall_group.update()
+    monster_gr.update()
+    ladder_gr.update()
+    kill = False
 
 
 def start_screen():
@@ -779,14 +841,16 @@ def start_screen():
 
 
 start_screen()
-player, level_x, level_y = generate_level(load_level('карта.txt'), 1)
+player = AnimatedSprite(load_image("player_D_inv.png"), 4, 1, 100, 100, rkey=10, ykey=10, bkey=10)
+level_x, level_y = generate_level(load_level('карта.txt'), 1)
 running = True
 keypress = None
 camera = Camera()
 watch = "d"
 timer = False
 timer_z = -1
-
+kill = False
+lvl = 1
 
 while running:
 
@@ -886,10 +950,6 @@ while running:
         if pygame.time.get_ticks() % 5000 == 1:
             player.add_life(5)
 
-
-
-
-
     monster_gr.update()
     screen.fill((0, 0, 0))
     all_sprites.draw(screen)
@@ -901,6 +961,5 @@ while running:
     # обновляем положение всех спрайтов
     for sprite in all_sprites:
         camera.apply(sprite)
-
 
 pygame.quit()
