@@ -348,6 +348,13 @@ class AnimatedSprite(pygame.sprite.Sprite):
                 self.rect.y = 50
                 self.y = 50
                 lvl += 1
+            elif lvl == 2:
+                level_x, level_y = generate_level(load_level('карта3.txt'), 3)
+                self.rect.x = 1200
+                self.x = 1200
+                self.rect.y = 550
+                self.y = 550
+                lvl += 1
         else:
             return False
 
@@ -646,13 +653,16 @@ class Table(pygame.sprite.Sprite):
 
 class Ladder(pygame.sprite.Sprite):
     image = load_image("ladder.png")
+    imagegreen = load_image("green.png")
 
-    def __init__(self, x, y):
+    def __init__(self, x, y, texture=0):
         super().__init__(all_sprites, ladder_gr)
         self.image = Ladder.image
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+        if texture == 1:
+            self.image = self.imagegreen
 
     def update(self):
         global kill
@@ -779,6 +789,10 @@ def generate_level(level, numlvl):
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 100, 100)
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 500, 700)
                     boss = Boss(load_image("skeleton.png"), 4, 1, 800, 400, 25, 900, 1, 2, region=200)
+                if numlvl == 3:
+                    skelet = Skeleton(load_image("skeleton.png"), 4, 1, 1800, 300)
+                    skelet = Skeleton(load_image("skeleton.png"), 4, 1, 1650, 300)
+                    skelet = Skeleton(load_image("skeleton.png"), 4, 1, 1650, 50)
             elif level[y][x] == 'Y':
                 door = Door(x * 50, y * 50, "Y")
             elif level[y][x] == '=':
@@ -804,6 +818,8 @@ def generate_level(level, numlvl):
             elif level[y][x] == '%':
                 Nstand = Nightstand(x * 50, y * 50, Money=random.choice((0, 0, 10)), rkey=True)
             elif level[y][x] == '*':
+                ladder = Ladder(x * 50, y * 50)
+            elif level[y][x] == '0':
                 ladder = Ladder(x * 50, y * 50)
             elif level[y][x] == '2':
                 grass = Grass(x * 50, y * 50)
@@ -967,7 +983,7 @@ def start_screen():
 
 
 # start_screen()
-player = AnimatedSprite(load_image("player_D_inv.png"), 4, 1, 100, 100, rkey=10, ykey=10, bkey=10, bosskey=1, money=100)
+player = AnimatedSprite(load_image("player_D_inv.png"), 4, 1, 100, 100, rkey=10, ykey=10, bkey=10, bosskey=2, money=100)
 level_x, level_y = generate_level(load_level('карта.txt'), 1)
 running = True
 keypress = None
