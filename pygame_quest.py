@@ -11,7 +11,7 @@ screen = pygame.display.set_mode(size)
 
 clock = pygame.time.Clock()
 FPS = 60
-STEP = 3
+STEP = 6
 
 
 class Boss(pygame.sprite.Sprite):
@@ -355,6 +355,8 @@ class AnimatedSprite(pygame.sprite.Sprite):
                 self.rect.y = 550
                 self.y = 550
                 lvl += 1
+            elif lvl == 3:
+                win_screen()
         else:
             return False
 
@@ -820,7 +822,7 @@ def generate_level(level, numlvl):
             elif level[y][x] == '*':
                 ladder = Ladder(x * 50, y * 50)
             elif level[y][x] == '0':
-                ladder = Ladder(x * 50, y * 50)
+                ladder = Ladder(x * 50, y * 50, 1)
             elif level[y][x] == '2':
                 grass = Grass(x * 50, y * 50)
 
@@ -952,6 +954,21 @@ def shop():
         pygame.display.flip()
         clock.tick(FPS)
 
+def win_screen():
+    fon = pygame.transform.scale(load_image('box.png'), (width, height))
+    screen.blit(fon, (0, 0))
+    font = pygame.font.Font(None, 250)
+    sfont = pygame.font.Font(None, 40)
+    screen.blit(sfont.render("Нажмити на любую клавишу, чтобы продолжить", True, (255, 255, 255)), (250, 500))
+    screen.blit(font.render("YOU WIN", True, (255, 0, 0)), (250, 250))
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif event.type == pygame.KEYDOWN:
+                return  # начинаем игру
+        pygame.display.flip()
+        clock.tick(FPS)
 
 def start_screen():
     intro_text = ["ЗАСТАВКА", "",
@@ -982,8 +999,7 @@ def start_screen():
         clock.tick(FPS)
 
 
-# start_screen()
-player = AnimatedSprite(load_image("player_D_inv.png"), 4, 1, 100, 100, rkey=10, ykey=10, bkey=10, bosskey=2, money=100)
+player = AnimatedSprite(load_image("player_D_inv.png"), 4, 1, 100, 100, rkey=10, ykey=10, bkey=10, bosskey=3, money=100)
 level_x, level_y = generate_level(load_level('карта.txt'), 1)
 running = True
 keypress = None
