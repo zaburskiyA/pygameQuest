@@ -415,6 +415,14 @@ class AnimatedSprite(pygame.sprite.Sprite):
         else:
             self.fight = 0
 
+    def get_info(self):
+        pygame.font.init()
+        myfont = pygame.font.SysFont('arial', 30)
+        textsurface = myfont.render('health: ' + str(self.life), True, (255, 255, 255))
+        screen.blit(textsurface, (10, 10))
+        print(self.life)
+        pygame.display.flip()
+
 
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)
@@ -937,8 +945,8 @@ while running:
         if collis:
             player.rect.y -= STEP
             player.y -= STEP
-    if keypress == "tab":  # TODO
-        pass
+      # TODO
+    player.get_info()
 
     if keypress == "f":
         player.fight_flag(True)
