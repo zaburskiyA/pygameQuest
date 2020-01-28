@@ -3,9 +3,11 @@ from math import sqrt
 import math
 
 pygame.init()
-infoObject = pygame.display.Info()
-screen = pygame.display.set_mode((infoObject.current_w - 500, infoObject.current_h - 300))
-size = width, height = infoObject.current_w, infoObject.current_h
+#infoObject = pygame.display.Info()
+#screen = pygame.display.set_mode((infoObject.current_w - 500, infoObject.current_h - 300))
+#size = width, height = infoObject.current_w, infoObject.current_h
+size = width, height = 1200, 600
+screen = pygame.display.set_mode(size)
 
 clock = pygame.time.Clock()
 FPS = 60
@@ -852,7 +854,8 @@ def shop():  # TODO
     global mode
     fon = pygame.transform.scale(load_image('fon.jpg'), (width, height))
     screen.blit(fon, (0, 0))
-    font = pygame.font.Font(None, 30)
+    font = pygame.font.Font(None, 100)
+    screen.blit(font.render("S H O P", True, (255, 255, 255)), (500, 100))
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -904,7 +907,7 @@ timer = False
 timer_z = -1
 kill = False
 lvl = 1
-mode = 2
+mode = 1
 
 while running:
     if mode == 1:
