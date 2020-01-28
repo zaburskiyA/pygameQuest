@@ -70,7 +70,7 @@ class Boss(pygame.sprite.Sprite):
                     self.rect.y -= dy * 2 * self.speed
                     self.x -= dx * 2 * self.speed
                     self.y -= dy * 2 * self.speed
-            if dist < 70:
+            if dist < player.dist:
                 if player.fight == 1:
                     self.del_life(player.damage)
                     print("здоровье босса", self.life)
@@ -88,10 +88,6 @@ class Boss(pygame.sprite.Sprite):
                                                   collided=pygame.sprite.collide_mask):
                         player.del_life(self.damage)
                         print(player.life)
-                        self.rect.x -= dx * 2 * self.speed
-                        self.rect.y -= dy * 2 * self.speed
-                        self.x -= dx * 2 * self.speed
-                        self.y -= dy * 2 * self.speed
                         timer = True
                         """
                         if player.life <= 0:
@@ -203,7 +199,7 @@ class Skeleton(pygame.sprite.Sprite):
                 self.rect.y -= dy * 2
                 self.x -= dx * 2
                 self.y -= dy * 2
-            if dist < 70:
+            if dist < player.dist:
                 if player.fight == 1:
                     self.del_life(player.damage)
                     print("здоровье скелета", self.life)
@@ -220,10 +216,6 @@ class Skeleton(pygame.sprite.Sprite):
                                                   collided=pygame.sprite.collide_mask):
                         player.del_life(self.damage)
                         print("здоровье игрока", player.life)
-                        self.rect.x -= dx * 2
-                        self.rect.y -= dy * 2
-                        self.x -= dx * 2
-                        self.y -= dy * 2
                         timer = True
                         """
                         if player.life <= 0:
@@ -238,9 +230,6 @@ class Skeleton(pygame.sprite.Sprite):
 
                 else:
                     timer = True
-
-
-
             else:
                 self.rect.x += dx * 2
                 self.rect.y += dy * 2
@@ -282,7 +271,8 @@ class Skeleton(pygame.sprite.Sprite):
 
 
 class AnimatedSprite(pygame.sprite.Sprite):
-    def __init__(self, sheet, columns, rows, x, y, rkey=0, ykey=0, bkey=0, bosskey=0, money=0, life_count=1, life=100):
+    def __init__(self, sheet, columns, rows, x, y, rkey=0, ykey=0, bkey=0, bosskey=0, money=0, life_count=1,
+                 life=100, dist=70):
         super().__init__(all_sprites, player_group)
         self.frames = []
         self.cut_sheet(sheet, columns, rows)
@@ -298,8 +288,11 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.bosskey = bosskey
         self.Money = money
         self.life = life
+        self.dist = dist
         self.damage = 20
         self.fight = 0
+        self.shuriken = 0
+        self.sward = False
         self.x = x
         self.y = y
         self.flag_sk = False
@@ -778,7 +771,6 @@ def generate_level(level, numlvl):
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 350, 400)
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 700, 100)
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 700, 400)
-                    skelet = Skeleton(load_image("skeleton.png"), 4, 1, 500, 700)
                     boss = Boss(load_image("skeleton.png"), 4, 1, 1500, 400, 20, 1000, 1, 1)
                 if numlvl == 2:
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 100, 450)
@@ -786,7 +778,6 @@ def generate_level(level, numlvl):
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 300, 700)
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 100, 100)
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 500, 700)
-                    skelet = Skeleton(load_image("skeleton.png"), 4, 1, 1600, 700)
                     boss = Boss(load_image("skeleton.png"), 4, 1, 800, 400, 25, 900, 1, 2, region=200)
             elif level[y][x] == 'Y':
                 door = Door(x * 50, y * 50, "Y")
@@ -839,6 +830,9 @@ def information():
                   "Синих ключей: {}".format(player.bkey),
                   "Красных ключей: {}".format(player.rkey),
                   "Босс ключей: {}".format(player.bosskey),
+                  "Сюрикенов: {}".format(player.shuriken),
+                  "Урон: {}".format(player.damage),
+                  "Длинна удара: {}".format(player.dist),
                   "Монет: {}".format(player.Money)]
     pygame.font.init()
     myfont = pygame.font.SysFont('arial', 30)
@@ -847,22 +841,98 @@ def information():
     y = 50
     for line in intro_text:
         screen.blit(myfont.render(line, True, (255, 255, 255)), (10, y))
-        y += 50
+        y += 30
 
 
-def shop():  # TODO
+def shop():
+    """функция срабатывает, если mode = 2
+    если нажать клавишу m, то mode = 2"""
     global mode
+    product1 = False
+    product2 = False
+    product3 = False
+    product4 = False
+    error_timer = False
+    error_timer_z = -1
+
     fon = pygame.transform.scale(load_image('fon.jpg'), (width, height))
     screen.blit(fon, (0, 0))
-    font = pygame.font.Font(None, 100)
-    screen.blit(font.render("S H O P", True, (255, 255, 255)), (500, 100))
+    fontB = pygame.font.Font(None, 100)
+    fontS = pygame.font.Font(None, 30)
+    screen.blit(fontB.render("S H O P", True, (255, 255, 255)), (500, 70))
+    screen.blit(fontS.render("Money: {}".format(player.Money), True, (255, 255, 255)), (10, 500))
+
     while True:
+        screen.blit(fon, (0, 0))
+        screen.blit(fontB.render("S H O P", True, (255, 255, 255)), (500, 70))
+        screen.blit(fontS.render("Money: {}".format(player.Money), True, (255, 255, 255)), (10, 500))
+        if error_timer and error_timer_z != -1:
+            if wait(1.5, error_timer_z):
+                error_timer_z = -1
+                error_timer = False
+            screen.blit(fontS.render("Вам не хватает монет или вам не доступен данный предмет",
+                                     True, (104, 28, 35)), (10, 460))
+
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
-            elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
-                mode = 1
-                return
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                x, y = event.pos
+                if x >= 396 and x <= 880 and y >= 372 and y <= 445:
+                    mode = 1
+                    return
+                elif y >= 164 and y <= 341:
+                    if x >= 87 and x <= 264:
+                        product1 = True
+                    elif x >= 396 and x <= 585:
+                        product2 = True
+                    elif x >= 695 and x <= 880:
+                        product3 = True
+                    elif x >= 970 and x <= 1135:
+                        product4 = True
+                if product1:
+                    product1 = False
+                    if player.Money >= 10 and player.shuriken < 100:
+                        player.shuriken += 1
+                        player.del_money(10)
+                    else:
+                        screen.blit(fontS.render("Вам не хватает монет или вам не доступен данный предмет",
+                                                 True, (104, 28, 35)), (10, 460))
+                        error_timer_z = pygame.time.get_ticks()
+                        error_timer = True
+                elif product2:
+                    product2 = False
+                    if player.Money >= 70 and player.life <= 90:
+                        player.life += 10
+                        player.del_money(70)
+                    else:
+                        screen.blit(fontS.render("Вам не хватает монет или вам не доступен данный предмет",
+                                                 True, (104, 28, 35)), (10, 460))
+                        error_timer_z = pygame.time.get_ticks()
+                        error_timer = True
+                elif product3:
+                    product3 = False
+                    if player.Money >= 150 and not player.sward:
+                        player.sward = True
+                        player.damage += 10
+                        player.del_money(150)
+                    else:
+                        screen.blit(fontS.render("Вам не хватает монет или вам не доступен данный предмет",
+                                                 True, (104, 28, 35)), (10, 460))
+                        error_timer_z = pygame.time.get_ticks()
+                        error_timer = True
+                elif product4:
+                    product4 = False
+                    if player.Money >= 100 and player.dist == 70:
+                        player.dist += 5
+                        player.del_money(100)
+                    else:
+                        screen.blit(fontS.render("Вам не хватает монет или вам не доступен данный предмет",
+                                                 True, (104, 28, 35)), (10, 460))
+                        error_timer_z = pygame.time.get_ticks()
+                        error_timer = True
+
         pygame.display.flip()
         clock.tick(FPS)
 
@@ -897,7 +967,7 @@ def start_screen():
 
 
 # start_screen()
-player = AnimatedSprite(load_image("player_D_inv.png"), 4, 1, 100, 100, rkey=10, ykey=10, bkey=10, bosskey=1)
+player = AnimatedSprite(load_image("player_D_inv.png"), 4, 1, 100, 100, rkey=10, ykey=10, bkey=10, bosskey=1, money=100)
 level_x, level_y = generate_level(load_level('карта.txt'), 1)
 running = True
 keypress = None
@@ -936,6 +1006,8 @@ while running:
                 keypress = None
                 player.fight_flag(False)
                 player.damage = 20
+                if player.sward:
+                    player.damage = 30
         if keypress == "tab":
             information()
         if keypress == "m":
