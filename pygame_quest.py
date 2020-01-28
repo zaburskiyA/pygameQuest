@@ -418,9 +418,8 @@ class AnimatedSprite(pygame.sprite.Sprite):
     def get_info(self):
         pygame.font.init()
         myfont = pygame.font.SysFont('arial', 30)
-        textsurface = myfont.render('health: ' + str(self.life), True, (255, 255, 255))
+        textsurface = myfont.render('Здоровье: ' + str(self.life), True, (255, 255, 255))
         screen.blit(textsurface, (10, 10))
-        print(self.life)
         pygame.display.flip()
 
 
@@ -832,14 +831,37 @@ def kill_all():
     kill = False
 
 
-def information():  # TODO
-    intro_text = ["Здоровье:", player.life,
-                  "Количество жизней:", player.life_count,
-                  "Жёлтых ключей:", player.ykey,
-                  "Синих ключей:", player.bkey,
-                  "Красных ключей:", player.rkey,
-                  "Босс ключей:", player.bosskey,
-                  "Монет:", player.Money]
+def information():
+    intro_text = ["Количество жизней: {}".format(player.life_count),
+                  "Жёлтых ключей: {}".format(player.ykey),
+                  "Синих ключей: {}".format(player.bkey),
+                  "Красных ключей: {}".format(player.rkey),
+                  "Босс ключей: {}".format(player.bosskey),
+                  "Монет: {}".format(player.Money)]
+    pygame.font.init()
+    myfont = pygame.font.SysFont('arial', 30)
+    textsurface = myfont.render('health: ' + str(player.life), True, (255, 255, 255))
+    pygame.display.flip()
+    y = 50
+    for line in intro_text:
+        screen.blit(myfont.render(line, True, (255, 255, 255)), (10, y))
+        y += 50
+
+
+def shop():  # TODO
+    global mode
+    fon = pygame.transform.scale(load_image('fon.jpg'), (width, height))
+    screen.blit(fon, (0, 0))
+    font = pygame.font.Font(None, 30)
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                mode = 1
+                return
+        pygame.display.flip()
+        clock.tick(FPS)
 
 
 def start_screen():
@@ -871,7 +893,7 @@ def start_screen():
         clock.tick(FPS)
 
 
-start_screen()
+# start_screen()
 player = AnimatedSprite(load_image("player_D_inv.png"), 4, 1, 100, 100, rkey=10, ykey=10, bkey=10, bosskey=1)
 level_x, level_y = generate_level(load_level('карта.txt'), 1)
 running = True
@@ -882,119 +904,128 @@ timer = False
 timer_z = -1
 kill = False
 lvl = 1
+mode = 2
 
 while running:
-
-    for event in pygame.event.get():
-        # при закрытии окна
-        if event.type == pygame.QUIT:
-            running = False
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            table_group.update(player.rect.x, player.rect.y, event)
-            door_group.update(player.rect.x, player.rect.y, event)
-        elif event.type == pygame.KEYDOWN:
-            if event.key == 275:
-                keypress = "r"
-            elif event.key == 276:
-                keypress = "l"
-            elif event.key == 273:
-                keypress = "u"
-            elif event.key == 274:
-                keypress = "d"
-            elif event.key == 102:
-                keypress = "f"
-            elif event.key == 9:
-                keypress = "tab"
-        elif event.type == pygame.KEYUP:
-            keypress = None
-            player.fight_flag(False)
-            player.damage = 20
-    if keypress == "r":
-        player.rect.x += STEP
-        player.change(load_image("player_R_inv.png"), 4, 1, player.rect.x, player.rect.y)
-        collis = player.update()
-        watch = "r"
-        player.x += STEP
-        if collis:
+    if mode == 1:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                table_group.update(player.rect.x, player.rect.y, event)
+                door_group.update(player.rect.x, player.rect.y, event)
+            elif event.type == pygame.KEYDOWN:
+                if event.key == 275:
+                    keypress = "r"
+                elif event.key == 276:
+                    keypress = "l"
+                elif event.key == 273:
+                    keypress = "u"
+                elif event.key == 274:
+                    keypress = "d"
+                elif event.key == 102:
+                    keypress = "f"
+                elif event.key == 9:
+                    keypress = "tab"
+                elif event.key == 109:
+                    keypress = "m"
+            elif event.type == pygame.KEYUP:
+                keypress = None
+                player.fight_flag(False)
+                player.damage = 20
+        if keypress == "tab":
+            information()
+        if keypress == "m":
+            keypress = ""
+            mode = 2
+        if keypress == "r":
+            player.rect.x += STEP
+            player.change(load_image("player_R_inv.png"), 4, 1, player.rect.x, player.rect.y)
+            collis = player.update()
+            watch = "r"
+            player.x += STEP
+            if collis:
+                player.rect.x -= STEP
+                player.x -= STEP
+        if keypress == "l":
             player.rect.x -= STEP
             player.x -= STEP
-    if keypress == "l":
-        player.rect.x -= STEP
-        player.x -= STEP
-        player.change(load_image("player_L_inv.png"), 4, 1, player.rect.x, player.rect.y)
-        collis = player.update()
-        watch = "l"
-        if collis:
-            player.rect.x += STEP
-            player.x += STEP
-    if keypress == "u":
-        player.rect.y -= STEP
-        player.y -= STEP
-        player.change(load_image("player_U_inv.png"), 4, 1, player.rect.x, player.rect.y)
-        collis = player.update()
-        watch = "u"
-        if collis:
-            player.rect.y += STEP
-            player.y += STEP
-    if keypress == "d":
-        player.rect.y += STEP
-        player.y += STEP
-        player.change(load_image("player_D_inv.png"), 4, 1, player.rect.x, player.rect.y)
-        collis = player.update()
-        watch = "d"
-        if collis:
+            player.change(load_image("player_L_inv.png"), 4, 1, player.rect.x, player.rect.y)
+            collis = player.update()
+            watch = "l"
+            if collis:
+                player.rect.x += STEP
+                player.x += STEP
+        if keypress == "u":
             player.rect.y -= STEP
             player.y -= STEP
-      # TODO
-    player.get_info()
+            player.change(load_image("player_U_inv.png"), 4, 1, player.rect.x, player.rect.y)
+            collis = player.update()
+            watch = "u"
+            if collis:
+                player.rect.y += STEP
+                player.y += STEP
+        if keypress == "d":
+            player.rect.y += STEP
+            player.y += STEP
+            player.change(load_image("player_D_inv.png"), 4, 1, player.rect.x, player.rect.y)
+            collis = player.update()
+            watch = "d"
+            if collis:
+                player.rect.y -= STEP
+                player.y -= STEP
+        # TODO
+        player.get_info()
 
-    if keypress == "f":
-        player.fight_flag(True)
-        if watch == "r":
-            player.change(load_image("hitR.png"), 4, 1, player.rect.x, player.rect.y)
-            collis = player.update()
-            if collis:
-                player.rect.x -= 1
-                player.x -= 1
-        elif watch == "l":
-            player.change(load_image("hitL.png"), 4, 1, player.rect.x, player.rect.y)
-            collis = player.update()
-            if collis:
-                player.rect.x += 1
-                player.x += 1
-        elif watch == "u":
-            player.change(load_image("hitU.png"), 4, 1, player.rect.x, player.rect.y)
-            collis = player.update()
-            if collis:
-                player.rect.y += 1
-                player.y -= 1
-        elif watch == "d":
-            player.change(load_image("hitD.png"), 4, 1, player.rect.x, player.rect.y)
-            collis = player.update()
-            if collis:
-                player.rect.y -= 1
-                player.y -= 1
-    if timer:
-        if timer_z == -1:
-            timer_z = pygame.time.get_ticks()
-        if wait(2, timer_z):
-            player.flag_sk = True
-            timer = False
-            timer_z = -1
-    if player.life < 95:
-        if pygame.time.get_ticks() % 5000 == 1:
-            player.add_life(5)
+        if keypress == "f":
+            player.fight_flag(True)
+            if watch == "r":
+                player.change(load_image("hitR.png"), 4, 1, player.rect.x, player.rect.y)
+                collis = player.update()
+                if collis:
+                    player.rect.x -= 1
+                    player.x -= 1
+            elif watch == "l":
+                player.change(load_image("hitL.png"), 4, 1, player.rect.x, player.rect.y)
+                collis = player.update()
+                if collis:
+                    player.rect.x += 1
+                    player.x += 1
+            elif watch == "u":
+                player.change(load_image("hitU.png"), 4, 1, player.rect.x, player.rect.y)
+                collis = player.update()
+                if collis:
+                    player.rect.y += 1
+                    player.y -= 1
+            elif watch == "d":
+                player.change(load_image("hitD.png"), 4, 1, player.rect.x, player.rect.y)
+                collis = player.update()
+                if collis:
+                    player.rect.y -= 1
+                    player.y -= 1
+        if timer:
+            if timer_z == -1:
+                timer_z = pygame.time.get_ticks()
+            if wait(2, timer_z):
+                player.flag_sk = True
+                timer = False
+                timer_z = -1
+        if player.life < 95:
+            if pygame.time.get_ticks() % 5000 == 1:
+                player.add_life(5)
 
-    monster_gr.update()
-    screen.fill((0, 0, 0))
-    all_sprites.draw(screen)
-    player_group.draw(screen)
-    pygame.display.flip()
-    clock.tick(FPS)
-    # изменяем ракурс камеры
-    camera.update(player);
-    # обновляем положение всех спрайтов
-    for sprite in all_sprites:
-        camera.apply(sprite)
+        monster_gr.update()
+        screen.fill((0, 0, 0))
+        all_sprites.draw(screen)
+        player_group.draw(screen)
+        pygame.display.flip()
+        clock.tick(FPS)
+        # изменяем ракурс камеры
+        camera.update(player);
+        # обновляем положение всех спрайтов
+        for sprite in all_sprites:
+            camera.apply(sprite)
+    elif mode == 2:
+        shop()
 
 pygame.quit()
