@@ -1053,9 +1053,22 @@ def start_screen():
         pygame.display.flip()
         clock.tick(FPS)
 
+def difficulty_menu():
+    global mode
+    fon = pygame.transform.scale(load_image('diff_menu.png'), (width, height))
+    screen.blit(fon, (0, 0))
+    fontB = pygame.font.Font(None, 100)
+    fontS = pygame.font.Font(None, 30)
+    while True:
+        screen.blit(fon, (0, 0))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+        pygame.display.flip()
+        clock.tick(FPS)
 def main_menu():
     global mode
-    fon = pygame.transform.scale(load_image('box.png'), (width, height))
+    fon = pygame.transform.scale(load_image('menu.png'), (width, height))
     screen.blit(fon, (0, 0))
     fontB = pygame.font.Font(None, 100)
     fontS = pygame.font.Font(None, 30)
@@ -1065,8 +1078,19 @@ def main_menu():
             if event.type == pygame.QUIT:
                 terminate()
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                mode = 1
-                return
+                x, y = event.pos
+                if x >= 147 and x <= 402:
+                    if y >= 137 and y <= 213:
+                        terminate()
+                if x >= 446 and x <= 936:
+                    if y >= 113 and y <= 223:
+                        mode = 3.1
+                        return
+                    elif y >= 277 and y <= 373:
+                        mode = 3.2
+                    elif y >= 420 and y <= 500:
+                        mode = 3.3
+
         pygame.display.flip()
         clock.tick(FPS)
 
@@ -1081,6 +1105,14 @@ timer_z = -1
 kill = False
 lvl = 1
 mode = 3
+"""
+mode
+1 - игра
+2 - магазин
+3 - меню
+3.1 - выбор сложности
+3.2  - правила
+3.3 - статистика"""
 sh_flag = True
 
 while running:
@@ -1240,5 +1272,7 @@ while running:
         shop()
     elif mode == 3:
         main_menu()
+    elif mode == 3.1:
+        difficulty_menu()
 
 pygame.quit()
