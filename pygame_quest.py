@@ -3,9 +3,9 @@ from math import sqrt
 import math
 
 pygame.init()
-#infoObject = pygame.display.Info()
-#screen = pygame.display.set_mode((infoObject.current_w - 500, infoObject.current_h - 300))
-#size = width, height = infoObject.current_w, infoObject.current_h
+# infoObject = pygame.display.Info()
+# screen = pygame.display.set_mode((infoObject.current_w - 500, infoObject.current_h - 300))
+# size = width, height = infoObject.current_w, infoObject.current_h
 size = width, height = 1200, 600
 screen = pygame.display.set_mode(size)
 
@@ -16,7 +16,7 @@ STEP = 6
 
 class Boss(pygame.sprite.Sprite):
     def __init__(self, sheet, columns, rows, x, y, damage, life, speed, num_boss, region=350):
-        super().__init__(all_sprites, monster_gr)
+        super().__init__(all_sprites, boss_gr)
         self.frames = []
         self.cut_sheet(sheet, columns, rows)
         self.cur_frame = 0
@@ -52,15 +52,17 @@ class Boss(pygame.sprite.Sprite):
         px, py = player.coord()
         dx2, dy2 = px - self.xd2, py - self.yd2
         dist2 = math.hypot(dx2, dy2) + 1
-        coll = pygame.sprite.groupcollide(monster_gr, wall_group, False, False,
+        coll = pygame.sprite.groupcollide(boss_gr, wall_group, False, False,
                                           collided=pygame.sprite.collide_mask)
-        coll1 = pygame.sprite.groupcollide(monster_gr, table_group, False, False,
+        coll1 = pygame.sprite.groupcollide(boss_gr, table_group, False, False,
                                            collided=pygame.sprite.collide_mask)
-        coll2 = pygame.sprite.groupcollide(monster_gr, door_group, False, False,
+        coll2 = pygame.sprite.groupcollide(boss_gr, door_group, False, False,
                                            collided=pygame.sprite.collide_mask)
-        coll3 = pygame.sprite.groupcollide(player_group, monster_gr, False, False,
+        coll3 = pygame.sprite.groupcollide(player_group, boss_gr, False, False,
                                            collided=pygame.sprite.collide_rect)
-        coll4 = pygame.sprite.groupcollide(player_group, monster_gr, False, False,
+        coll4 = pygame.sprite.groupcollide(player_group, boss_gr, False, False,
+                                           collided=pygame.sprite.collide_mask)
+        coll5 = pygame.sprite.groupcollide(shuriken_gr, boss_gr, False, False,
                                            collided=pygame.sprite.collide_mask)
 
         if abs(dist2) < self.region or abs(dist) < 150:
@@ -105,6 +107,15 @@ class Boss(pygame.sprite.Sprite):
                 self.rect.y += dy * 2 * self.speed
                 self.x += dx * 2 * self.speed
                 self.y += dy * 2 * self.speed
+        if coll5:
+            self.del_life(20)
+            print("здоровье босса", self.life)
+            if self.life <= 0:
+                pygame.sprite.Sprite.kill(self)
+                print("u kill boss")
+                player.add_money(random.choice((10, 10, 10, 15, 20)))
+                player.add_key("bosskey")
+
         if dx < 0:
             if self.num_boss == 1:
                 self.change(load_image('fBossL.png'), 4, 1, self.rect.x, self.rect.y)
@@ -192,6 +203,8 @@ class Skeleton(pygame.sprite.Sprite):
                                            collided=pygame.sprite.collide_rect)
         coll4 = pygame.sprite.groupcollide(player_group, monster_gr, False, False,
                                            collided=pygame.sprite.collide_mask)
+        coll5 = pygame.sprite.groupcollide(shuriken_gr, monster_gr, False, False,
+                                           collided=pygame.sprite.collide_mask)
 
         if abs(dist2) < 200 or abs(dist) < 70:
             if coll or coll1 or coll2:
@@ -226,8 +239,6 @@ class Skeleton(pygame.sprite.Sprite):
                                 player.rect.y = 100
                                 player.y = 100
                         """
-
-
                 else:
                     timer = True
             else:
@@ -235,6 +246,13 @@ class Skeleton(pygame.sprite.Sprite):
                 self.rect.y += dy * 2
                 self.x += dx * 2
                 self.y += dy * 2
+        if coll5:
+            self.del_life(20)
+            print("здоровье скелета", self.life)
+            if self.life <= 0:
+                pygame.sprite.Sprite.kill(self)
+                print("u kill skeleton")
+                player.add_money(random.choice((10, 10, 10, 15, 20)))
         if dx < 0:
             self.change(load_image('skeletonL.png'), 4, 1, self.rect.x, self.rect.y)
         else:
@@ -281,7 +299,6 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.rect = self.rect.move(x, y)
         self.check_frame = 0
         self.mask = pygame.mask.from_surface(self.image)
-        self.mask2 = pygame.mask.from_surface(self.image)
         self.rkey = rkey
         self.ykey = ykey
         self.bkey = bkey
@@ -427,6 +444,8 @@ class AnimatedSprite(pygame.sprite.Sprite):
         pygame.display.flip()
 
 
+
+
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)
     try:
@@ -440,6 +459,41 @@ def load_image(name, colorkey=None):
     image = image.convert_alpha()
     return image
 
+class Shuriken(pygame.sprite.Sprite):
+    image = load_image("shur.png")
+
+    def __init__(self, plx, ply, x, y):
+        super().__init__(all_sprites, shuriken_gr)
+        self.image = Shuriken.image
+        self.x = x
+        self.y = y
+        self.rect = self.image.get_rect()
+        self.rect.x = plx
+        self.rect.y = ply
+        self.mask = pygame.mask.from_surface(self.image)
+        self.dx, self.dy = self.x - self.rect.x, self.y - self.rect.y
+        dist = math.hypot(self.dx, self.dy) + 1
+        self.dx, self.dy = self.dx / dist, self.dy / dist
+
+    def update(self):
+        global kill, sh_flag
+        if kill:
+            pygame.sprite.Sprite.kill(self)
+        coll = pygame.sprite.groupcollide(shuriken_gr, wall_group, False, False,
+                                          collided=pygame.sprite.collide_mask)
+        coll1 = pygame.sprite.groupcollide(shuriken_gr, table_group, False, False,
+                                           collided=pygame.sprite.collide_mask)
+        coll2 = pygame.sprite.groupcollide(shuriken_gr, door_group, False, False,
+                                           collided=pygame.sprite.collide_mask)
+        coll3 = pygame.sprite.groupcollide(shuriken_gr, monster_gr, False, False,
+                                           collided=pygame.sprite.collide_mask)
+        coll4 = pygame.sprite.groupcollide(shuriken_gr, boss_gr, False, False,
+                                           collided=pygame.sprite.collide_mask)
+        if coll or coll1 or coll2 or coll3 or coll4:
+            sh_flag = True
+            pygame.sprite.Sprite.kill(self)
+        self.rect.x += self.dx * 6
+        self.rect.y += self.dy * 6
 
 def wait(second, now):
     return pygame.time.get_ticks() - now > second * 1000 - 100 and \
@@ -467,8 +521,6 @@ def load_level(filename):
 tile_images = {'wall': load_image('box.png'), 'empty': load_image('grass.png'),
                'door': load_image('door.png'), 'table': load_image('table.png'),
                'Nstand': load_image('nightstand_close.png'), 'ladder': load_image('ladder.png')}
-player_image = load_image('mar.png', -1)
-
 tile_width = tile_height = 50
 
 
@@ -763,8 +815,10 @@ wall_group = pygame.sprite.Group()
 table_group = pygame.sprite.Group()
 door_group = pygame.sprite.Group()
 monster_gr = pygame.sprite.Group()
+boss_gr = pygame.sprite.Group()
 ladder_gr = pygame.sprite.Group()
 grass_gr = pygame.sprite.Group()
+shuriken_gr = pygame.sprite.Group()
 
 
 def generate_level(level, numlvl):
@@ -891,7 +945,6 @@ def shop():
             screen.blit(fontS.render("Вам не хватает монет или вам не доступен данный предмет",
                                      True, (104, 28, 35)), (10, 460))
 
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
@@ -954,6 +1007,7 @@ def shop():
         pygame.display.flip()
         clock.tick(FPS)
 
+
 def win_screen():
     fon = pygame.transform.scale(load_image('box.png'), (width, height))
     screen.blit(fon, (0, 0))
@@ -969,6 +1023,7 @@ def win_screen():
                 return  # начинаем игру
         pygame.display.flip()
         clock.tick(FPS)
+
 
 def start_screen():
     intro_text = ["ЗАСТАВКА", "",
@@ -1010,6 +1065,7 @@ timer_z = -1
 kill = False
 lvl = 1
 mode = 1
+sh_flag = True
 
 while running:
     if mode == 1:
@@ -1019,6 +1075,11 @@ while running:
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 table_group.update(player.rect.x, player.rect.y, event)
                 door_group.update(player.rect.x, player.rect.y, event)
+                if keypress == "g" and sh_flag and player.shuriken > 0:
+                    sh_flag = False
+                    player.shuriken -= 1
+                    shx, shy = event.pos
+                    shuriken = Shuriken(player.rect.x, player.rect.y, shx, shy)
             elif event.type == pygame.KEYDOWN:
                 if event.key == 275:
                     keypress = "r"
@@ -1034,6 +1095,8 @@ while running:
                     keypress = "tab"
                 elif event.key == 109:
                     keypress = "m"
+                elif event.key == 103:
+                    keypress = "g"
             elif event.type == pygame.KEYUP:
                 keypress = None
                 player.fight_flag(False)
@@ -1144,7 +1207,7 @@ while running:
         if player.life < 95:
             if pygame.time.get_ticks() % 5000 == 1:
                 player.add_life(5)
-
+        shuriken_gr.update()
         monster_gr.update()
         screen.fill((0, 0, 0))
         all_sprites.draw(screen)
