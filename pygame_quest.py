@@ -11,7 +11,7 @@ screen = pygame.display.set_mode(size)
 
 clock = pygame.time.Clock()
 FPS = 60
-STEP = 6
+STEP = 3
 
 
 class Boss(pygame.sprite.Sprite):
@@ -837,7 +837,7 @@ def generate_level(level, numlvl):
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 350, 400)
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 700, 100)
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 700, 400)
-                    boss = Boss(load_image("skeleton.png"), 4, 1, 1500, 400, 20, 1000, 1, 1)
+                    boss = Boss(load_image("fBossR.png"), 4, 1, 1500, 400, 20, 1000, 1, 1)
                 if numlvl == 2:
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 100, 450)
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 300, 450)
@@ -1053,8 +1053,24 @@ def start_screen():
         pygame.display.flip()
         clock.tick(FPS)
 
+def main_menu():
+    global mode
+    fon = pygame.transform.scale(load_image('box.png'), (width, height))
+    screen.blit(fon, (0, 0))
+    fontB = pygame.font.Font(None, 100)
+    fontS = pygame.font.Font(None, 30)
+    while True:
+        screen.blit(fon, (0, 0))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mode = 1
+                return
+        pygame.display.flip()
+        clock.tick(FPS)
 
-player = AnimatedSprite(load_image("player_D_inv.png"), 4, 1, 100, 100, rkey=10, ykey=10, bkey=10, bosskey=3, money=100)
+player = AnimatedSprite(load_image("player_D_inv.png"), 4, 1, 100, 100, rkey=0, ykey=0, bkey=0, bosskey=1, money=0)
 level_x, level_y = generate_level(load_level('карта.txt'), 1)
 running = True
 keypress = None
@@ -1064,7 +1080,7 @@ timer = False
 timer_z = -1
 kill = False
 lvl = 1
-mode = 1
+mode = 3
 sh_flag = True
 
 while running:
@@ -1207,6 +1223,7 @@ while running:
         if player.life < 95:
             if pygame.time.get_ticks() % 5000 == 1:
                 player.add_life(5)
+        boss_gr.update()
         shuriken_gr.update()
         monster_gr.update()
         screen.fill((0, 0, 0))
@@ -1221,5 +1238,7 @@ while running:
             camera.apply(sprite)
     elif mode == 2:
         shop()
+    elif mode == 3:
+        main_menu()
 
 pygame.quit()
