@@ -1047,7 +1047,10 @@ while running:
             mode = 2
         if keypress == "r":
             player.rect.x += STEP
-            player.change(load_image("player_R_inv.png"), 4, 1, player.rect.x, player.rect.y)
+            if player.sward:
+                player.change(load_image("swplayer_R_inv.png"), 4, 1, player.rect.x, player.rect.y)
+            else:
+                player.change(load_image("player_R_inv.png"), 4, 1, player.rect.x, player.rect.y)
             collis = player.update()
             watch = "r"
             player.x += STEP
@@ -1057,7 +1060,10 @@ while running:
         if keypress == "l":
             player.rect.x -= STEP
             player.x -= STEP
-            player.change(load_image("player_L_inv.png"), 4, 1, player.rect.x, player.rect.y)
+            if player.sward:
+                player.change(load_image("swplayer_L_inv.png"), 4, 1, player.rect.x, player.rect.y)
+            else:
+                player.change(load_image("player_L_inv.png"), 4, 1, player.rect.x, player.rect.y)
             collis = player.update()
             watch = "l"
             if collis:
@@ -1066,7 +1072,10 @@ while running:
         if keypress == "u":
             player.rect.y -= STEP
             player.y -= STEP
-            player.change(load_image("player_U_inv.png"), 4, 1, player.rect.x, player.rect.y)
+            if player.sward:
+                player.change(load_image("swplayer_U_inv.png"), 4, 1, player.rect.x, player.rect.y)
+            else:
+                player.change(load_image("player_U_inv.png"), 4, 1, player.rect.x, player.rect.y)
             collis = player.update()
             watch = "u"
             if collis:
@@ -1075,7 +1084,10 @@ while running:
         if keypress == "d":
             player.rect.y += STEP
             player.y += STEP
-            player.change(load_image("player_D_inv.png"), 4, 1, player.rect.x, player.rect.y)
+            if player.sward:
+                player.change(load_image("swplayer_D_inv.png"), 4, 1, player.rect.x, player.rect.y)
+            else:
+                player.change(load_image("player_D_inv.png"), 4, 1, player.rect.x, player.rect.y)
             collis = player.update()
             watch = "d"
             if collis:
@@ -1087,25 +1099,37 @@ while running:
         if keypress == "f":
             player.fight_flag(True)
             if watch == "r":
-                player.change(load_image("hitR.png"), 4, 1, player.rect.x, player.rect.y)
+                if player.sward:
+                    player.change(load_image("swhitR.png"), 4, 1, player.rect.x, player.rect.y)
+                else:
+                    player.change(load_image("hitR.png"), 4, 1, player.rect.x, player.rect.y)
                 collis = player.update()
                 if collis:
                     player.rect.x -= 1
                     player.x -= 1
             elif watch == "l":
-                player.change(load_image("hitL.png"), 4, 1, player.rect.x, player.rect.y)
+                if player.sward:
+                    player.change(load_image("swhitL.png"), 4, 1, player.rect.x, player.rect.y)
+                else:
+                    player.change(load_image("hitL.png"), 4, 1, player.rect.x, player.rect.y)
                 collis = player.update()
                 if collis:
                     player.rect.x += 1
                     player.x += 1
             elif watch == "u":
-                player.change(load_image("hitU.png"), 4, 1, player.rect.x, player.rect.y)
+                if player.sward:
+                    player.change(load_image("swhitU.png"), 4, 1, player.rect.x, player.rect.y)
+                else:
+                    player.change(load_image("hitU.png"), 4, 1, player.rect.x, player.rect.y)
                 collis = player.update()
                 if collis:
                     player.rect.y += 1
                     player.y -= 1
             elif watch == "d":
-                player.change(load_image("hitD.png"), 4, 1, player.rect.x, player.rect.y)
+                if player.sward:
+                    player.change(load_image("swhitD.png"), 4, 1, player.rect.x, player.rect.y)
+                else:
+                    player.change(load_image("hitD.png"), 4, 1, player.rect.x, player.rect.y)
                 collis = player.update()
                 if collis:
                     player.rect.y -= 1
