@@ -1064,6 +1064,34 @@ def difficulty_menu():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                print(event.pos)
+                x, y = event.pos
+                if x >= 241 and x <= 590:
+                    if y >= 424 and y <= 516:
+                        mode = 3
+                        return
+                if x >= 677 and x <= 1009:
+                    if y >= 80 and y <= 155:
+                        print("easy")
+                        player.life_count = 3
+                        mode = 1
+                        return
+                    elif y >= 212 and y <= 279:
+                        print("medium")
+                        player.life_count = 2
+                        mode = 1
+                        return
+                    elif y >= 318 and y <= 380:
+                        print("hard")
+                        player.life_count = 1
+                        mode = 1
+                        return
+                    elif y >= 410 and y <= 475:
+                        print("random")
+                        player.life_count = random.randrange(1, 4)
+                        mode = 1
+                        return
         pygame.display.flip()
         clock.tick(FPS)
 def main_menu():
