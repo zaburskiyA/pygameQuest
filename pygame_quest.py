@@ -11,7 +11,7 @@ screen = pygame.display.set_mode(size)
 
 clock = pygame.time.Clock()
 FPS = 60
-STEP = 3
+STEP = 9
 
 
 class Boss(pygame.sprite.Sprite):
@@ -108,7 +108,7 @@ class Boss(pygame.sprite.Sprite):
                 self.x += dx * 2 * self.speed
                 self.y += dy * 2 * self.speed
         if coll5:
-            self.del_life(20)
+            self.del_life(30)
             print("здоровье босса", self.life)
             if self.life <= 0:
                 pygame.sprite.Sprite.kill(self)
@@ -247,7 +247,7 @@ class Skeleton(pygame.sprite.Sprite):
                 self.x += dx * 2
                 self.y += dy * 2
         if coll5:
-            self.del_life(20)
+            self.del_life(30)
             print("здоровье скелета", self.life)
             if self.life <= 0:
                 pygame.sprite.Sprite.kill(self)
@@ -339,7 +339,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
                     frame_location, self.rect.size)))
 
     def update(self):
-        global kill, level_x, level_y, lvl
+        global kill, level_x, level_y, lvl, mode
         if kill:
             pygame.sprite.Sprite.kill(self)
         self.check_frame += 1
@@ -373,7 +373,8 @@ class AnimatedSprite(pygame.sprite.Sprite):
                 self.y = 550
                 lvl += 1
             elif lvl == 3:
-                win_screen()
+                mode = 4
+                return
         else:
             return False
 
@@ -444,8 +445,6 @@ class AnimatedSprite(pygame.sprite.Sprite):
         pygame.display.flip()
 
 
-
-
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)
     try:
@@ -458,6 +457,7 @@ def load_image(name, colorkey=None):
         image.set_colorkey(colorkey)
     image = image.convert_alpha()
     return image
+
 
 class Shuriken(pygame.sprite.Sprite):
     image = load_image("shur.png")
@@ -494,6 +494,7 @@ class Shuriken(pygame.sprite.Sprite):
             pygame.sprite.Sprite.kill(self)
         self.rect.x += self.dx * 6
         self.rect.y += self.dy * 6
+
 
 def wait(second, now):
     return pygame.time.get_ticks() - now > second * 1000 - 100 and \
@@ -891,6 +892,8 @@ def kill_all():
     table_group.update(player.rect.x, player.rect.y)
     wall_group.update()
     monster_gr.update()
+    shuriken_gr.update()
+    boss_gr.update()
     ladder_gr.update()
     grass_gr.update()
     kill = False
@@ -1009,6 +1012,7 @@ def shop():
 
 
 def win_screen():
+    global mode
     fon = pygame.transform.scale(load_image('box.png'), (width, height))
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 250)
@@ -1020,48 +1024,29 @@ def win_screen():
             if event.type == pygame.QUIT:
                 terminate()
             elif event.type == pygame.KEYDOWN:
-                return  # начинаем игру
+                mode = 3
+                return
         pygame.display.flip()
         clock.tick(FPS)
 
 
-def start_screen():
-    intro_text = ["ЗАСТАВКА", "",
-                  "Правила игры",
-                  "Если в правилах несколько строк,",
-                  "приходится выводить их построчно"]
 
-    fon = pygame.transform.scale(load_image('fon.jpg'), (width, height))
-    screen.blit(fon, (0, 0))
-    font = pygame.font.Font(None, 30)
-    text_coord = 50
-    for line in intro_text:
-        string_rendered = font.render(line, 1, pygame.Color('black'))
-        intro_rect = string_rendered.get_rect()
-        text_coord += 10
-        intro_rect.top = text_coord
-        intro_rect.x = 10
-        text_coord += intro_rect.height
-        screen.blit(string_rendered, intro_rect)
-
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                terminate()
-            elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
-                return  # начинаем игру
-        pygame.display.flip()
-        clock.tick(FPS)
 
 def play(num_play):
-    global keypress, watch, timer, timer_z, kill, lvl, mode, sh_flag, level_x, level_y, player
+    global keypress, watch, timer, timer_z, kill, lvl, mode, sh_flag, level_x, level_y, player, lvl
     if num_play == 0:
-        player = AnimatedSprite(load_image("player_D_inv.png"), 4, 1, 100, 100, rkey=0, ykey=0, bkey=0, bosskey=1,
-                                money=0)
+        player = AnimatedSprite(load_image("player_D_inv.png"), 4, 1, 100, 100, rkey=20, ykey=20, bkey=20, bosskey=3,
+                                money=1000)
         num_play += 1
     if num_play == 1:
+        lvl = 1
         level_x, level_y = generate_level(load_level('карта.txt'), 1)
+        player.rect.x = 100
+        player.x = 100
+        player.y = 100
+        player.rect.y = 100
         player.life_count = diff
+        player.life = 100
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -1215,25 +1200,37 @@ def play(num_play):
         # обновляем положение всех спрайтов
         for sprite in all_sprites:
             camera.apply(sprite)
+        if mode == 4:
+            return
 
-def help1str():
+
+def rules():
     global mode, game_f, diff
-    fon = pygame.transform.scale(load_image('rules_1.png'), (width, height))
-    screen.blit(fon, (0, 0))
-    fontB = pygame.font.Font(None, 100)
-    fontS = pygame.font.Font(None, 30)
+    change = True
+    fon1 = pygame.transform.scale(load_image('rules_1.jpg'), (width, height))
+    fon2 = pygame.transform.scale(load_image('rules_2.jpg'), (width, height))
+    screen.blit(fon1, (0, 0))
     while True:
-        screen.blit(fon, (0, 0))
+        if change:
+            screen.blit(fon1, (0, 0))
+        else:
+            screen.blit(fon2, (0, 0))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 print(event.pos)
                 x, y = event.pos
-                if x >= 241 and x <= 590:
-                    if y >= 424 and y <= 516:
+                if y >= 429 and y <= 521:
+                    if x >= 239 and x <= 595:
                         mode = 3
-                        #return
+                        return
+                    if x >= 723 and x <= 972:
+                        change = not change
+
+        pygame.display.flip()
+        clock.tick(FPS)
+
 
 def difficulty_menu():
     global mode, game_f, diff
@@ -1292,6 +1289,8 @@ def difficulty_menu():
                         return
         pygame.display.flip()
         clock.tick(FPS)
+
+
 def main_menu():
     global mode
     fon = pygame.transform.scale(load_image('menu.png'), (width, height))
@@ -1321,6 +1320,8 @@ def main_menu():
 
         pygame.display.flip()
         clock.tick(FPS)
+
+
 game_f = False
 running = True
 keypress = None
@@ -1339,7 +1340,8 @@ mode
 3 - меню
 3.1 - выбор сложности
 3.2  - правила
-3.3 - статистика"""
+3.3 - статистика
+4 - win"""
 sh_flag = True
 
 while running:
@@ -1356,6 +1358,8 @@ while running:
     elif mode == 3.1:
         difficulty_menu()
     elif mode == 3.2:
-        help1str()
+        rules()
+    elif mode == 4:
+        win_screen()
 
 pygame.quit()
