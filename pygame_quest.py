@@ -44,7 +44,7 @@ class Boss(pygame.sprite.Sprite):
                     frame_location, self.rect.size)))
 
     def move_towards_player(self, player):
-        global timer
+        global timer, mode
         dx, dy = player.rect.x - self.rect.x, player.rect.y - self.rect.y
         dist = math.hypot(dx, dy) + 1
         dx, dy = dx / dist, dy / dist
@@ -83,23 +83,26 @@ class Boss(pygame.sprite.Sprite):
                         player.add_money(random.choice((10, 10, 10, 15, 20)))
                         player.add_key("bosskey")
 
-            if coll4:
+            if coll4:  # TODO
                 if player.flag_sk:
                     player.flag_sk = False
-                    if pygame.sprite.groupcollide(player_group, monster_gr, False, False,
+                    if pygame.sprite.groupcollide(player_group, boss_gr, False, False,
                                                   collided=pygame.sprite.collide_mask):
                         player.del_life(self.damage)
-                        print(player.life)
+                        print("здоровье игрока", player.life)
                         timer = True
-                        """
                         if player.life <= 0:
-                            if player.life_count > 0:
+                            if player.life_count > 1:
                                 player.life_count -= 1
-                                player.rect.x = 100
-                                player.x = 100
-                                player.rect.y = 100
-                                player.y = 100
-                        """
+                                player.life = 100
+                                if lvl == 1:
+                                    player.rect.x = spawn.rect.x
+                                    player.rect.y = spawn.rect.y
+                                    player.x = spawn.rect.x
+                                    player.y = spawn.rect.y
+                            else:
+                                mode = 5
+                                return
                 else:
                     timer = True
             else:
@@ -222,7 +225,7 @@ class Skeleton(pygame.sprite.Sprite):
                         print("u kill skeleton")
                         player.add_money(random.choice((10, 10, 10, 15, 20)))
 
-            if coll4:
+            if coll4:  # TODO
                 if player.flag_sk:
                     player.flag_sk = False
                     if pygame.sprite.groupcollide(player_group, monster_gr, False, False,
@@ -362,20 +365,18 @@ class AnimatedSprite(pygame.sprite.Sprite):
         elif coll3:
             kill_all()
             if lvl == 1:
-                level_x, level_y = generate_level(load_level('карта2.txt'), 2)
+                spawn, level_x, level_y = generate_level(load_level('карта2.txt'), 2)
                 self.rect.x = 1650
                 self.x = 1650
                 self.rect.y = 50
                 self.y = 50
-                spawn = Spawn1(self.rect.x, self.rect.y)
                 lvl += 1
             elif lvl == 2:
-                level_x, level_y = generate_level(load_level('карта3.txt'), 3)
+                spawn, level_x, level_y = generate_level(load_level('карта3.txt'), 3)
                 self.rect.x = 1200
                 self.x = 1200
                 self.rect.y = 550
                 self.y = 550
-                spawn = Spawn1(self.rect.x, self.rect.y)
                 lvl += 1
             elif lvl == 3:
                 mode = 4
@@ -858,7 +859,7 @@ shuriken_gr = pygame.sprite.Group()
 
 
 def generate_level(level, numlvl):
-    new_player, x, y = None, None, None
+    spawn, x, y = None, None, None
     for y in range(len(level)):
         for x in range(len(level[y])):
             if level[y][x] == '#':
@@ -866,7 +867,7 @@ def generate_level(level, numlvl):
             elif level[y][x] == '.':
                 grass = Grass(x * 50, y * 50)
             elif level[y][x] == '1':
-                grass = Grass(x * 50, y * 50)
+                spawn = Spawn1(x * 50, y * 50)
             elif level[y][x] == '@':
                 wall = Wall(x * 50, y * 50, x * 50 + 50, y * 50 + 50)
                 if numlvl == 1:
@@ -917,7 +918,7 @@ def generate_level(level, numlvl):
                 grass = Grass(x * 50, y * 50)
 
     # вернем игрока, а также размер поля в клетках
-    return x, y
+    return spawn, x, y
 
 
 def kill_all():
@@ -1092,7 +1093,7 @@ def play(num_play):
         num_play += 1
     if num_play == 1:
         lvl = 1
-        level_x, level_y = generate_level(load_level('карта.txt'), 1)
+        spawn, level_x, level_y = generate_level(load_level('карта.txt'), 1)
         player.rect.x = 100
         player.x = 100
         player.y = 100
@@ -1100,7 +1101,6 @@ def play(num_play):
         player.life_count = diff
         player.clear()
         player.bosskey = 3
-        spawn = Spawn1(player.rect.x, player.rect.y)
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
