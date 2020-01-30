@@ -83,7 +83,7 @@ class Boss(pygame.sprite.Sprite):
                         player.add_money(random.choice((10, 10, 10, 15, 20)))
                         player.add_key("bosskey")
 
-            if coll4:  # TODO
+            if coll4:
                 if player.flag_sk:
                     player.flag_sk = False
                     if pygame.sprite.groupcollide(player_group, boss_gr, False, False,
@@ -95,11 +95,10 @@ class Boss(pygame.sprite.Sprite):
                             if player.life_count > 1:
                                 player.life_count -= 1
                                 player.life = 100
-                                if lvl == 1:
-                                    player.rect.x = spawn.rect.x
-                                    player.rect.y = spawn.rect.y
-                                    player.x = spawn.rect.x
-                                    player.y = spawn.rect.y
+                                player.rect.x = spawn.rect.x
+                                player.rect.y = spawn.rect.y
+                                player.x = spawn.rect.x
+                                player.y = spawn.rect.y
                             else:
                                 mode = 5
                                 return
@@ -225,7 +224,7 @@ class Skeleton(pygame.sprite.Sprite):
                         print("u kill skeleton")
                         player.add_money(random.choice((10, 10, 10, 15, 20)))
 
-            if coll4:  # TODO
+            if coll4:
                 if player.flag_sk:
                     player.flag_sk = False
                     if pygame.sprite.groupcollide(player_group, monster_gr, False, False,
@@ -237,11 +236,10 @@ class Skeleton(pygame.sprite.Sprite):
                             if player.life_count > 1:
                                 player.life_count -= 1
                                 player.life = 100
-                                if lvl == 1:
-                                    player.rect.x = spawn.rect.x
-                                    player.rect.y = spawn.rect.y
-                                    player.x = spawn.rect.x
-                                    player.y = spawn.rect.y
+                                player.rect.x = spawn.rect.x
+                                player.rect.y = spawn.rect.y
+                                player.x = spawn.rect.x
+                                player.y = spawn.rect.y
                             else:
                                 mode = 5
                                 return
@@ -859,6 +857,7 @@ shuriken_gr = pygame.sprite.Group()
 
 
 def generate_level(level, numlvl):
+    global spawn
     spawn, x, y = None, None, None
     for y in range(len(level)):
         for x in range(len(level[y])):
@@ -1094,10 +1093,10 @@ def play(num_play):
     if num_play == 1:
         lvl = 1
         spawn, level_x, level_y = generate_level(load_level('карта.txt'), 1)
-        player.rect.x = 100
-        player.x = 100
-        player.y = 100
-        player.rect.y = 100
+        player.rect.x = spawn.rect.x
+        player.x = spawn.rect.x
+        player.y = spawn.rect.y
+        player.rect.y = spawn.rect.y
         player.life_count = diff
         player.clear()
         player.bosskey = 3
