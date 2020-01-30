@@ -1216,6 +1216,24 @@ def play(num_play):
         for sprite in all_sprites:
             camera.apply(sprite)
 
+def help1str():
+    global mode, game_f, diff
+    fon = pygame.transform.scale(load_image('rules_1.png'), (width, height))
+    screen.blit(fon, (0, 0))
+    fontB = pygame.font.Font(None, 100)
+    fontS = pygame.font.Font(None, 30)
+    while True:
+        screen.blit(fon, (0, 0))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                print(event.pos)
+                x, y = event.pos
+                if x >= 241 and x <= 590:
+                    if y >= 424 and y <= 516:
+                        mode = 3
+                        #return
 
 def difficulty_menu():
     global mode, game_f, diff
@@ -1295,7 +1313,9 @@ def main_menu():
                         mode = 3.1
                         return
                     elif y >= 277 and y <= 373:
+                        print(1)
                         mode = 3.2
+                        return
                     elif y >= 420 and y <= 500:
                         mode = 3.3
 
@@ -1335,5 +1355,7 @@ while running:
         main_menu()
     elif mode == 3.1:
         difficulty_menu()
+    elif mode == 3.2:
+        help1str()
 
 pygame.quit()
