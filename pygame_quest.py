@@ -1053,101 +1053,19 @@ def start_screen():
         pygame.display.flip()
         clock.tick(FPS)
 
-def difficulty_menu():
-    global mode
-    fon = pygame.transform.scale(load_image('diff_menu.png'), (width, height))
-    screen.blit(fon, (0, 0))
-    fontB = pygame.font.Font(None, 100)
-    fontS = pygame.font.Font(None, 30)
+def play(num_play):
+    global keypress, watch, timer, timer_z, kill, lvl, mode, sh_flag, level_x, level_y, player
+    if num_play == 0:
+        player = AnimatedSprite(load_image("player_D_inv.png"), 4, 1, 100, 100, rkey=0, ykey=0, bkey=0, bosskey=1,
+                                money=0)
+        num_play += 1
+    if num_play == 1:
+        level_x, level_y = generate_level(load_level('карта.txt'), 1)
+        player.life_count = diff
     while True:
-        screen.blit(fon, (0, 0))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                print(event.pos)
-                x, y = event.pos
-                if x >= 241 and x <= 590:
-                    if y >= 424 and y <= 516:
-                        mode = 3
-                        return
-                if x >= 677 and x <= 1009:
-                    if y >= 80 and y <= 155:
-                        print("easy")
-                        player.life_count = 3
-                        mode = 1
-                        return
-                    elif y >= 212 and y <= 279:
-                        print("medium")
-                        player.life_count = 2
-                        mode = 1
-                        return
-                    elif y >= 318 and y <= 380:
-                        print("hard")
-                        player.life_count = 1
-                        mode = 1
-                        return
-                    elif y >= 410 and y <= 475:
-                        print("random")
-                        player.life_count = random.randrange(1, 4)
-                        mode = 1
-                        return
-        pygame.display.flip()
-        clock.tick(FPS)
-def main_menu():
-    global mode
-    fon = pygame.transform.scale(load_image('menu.png'), (width, height))
-    screen.blit(fon, (0, 0))
-    fontB = pygame.font.Font(None, 100)
-    fontS = pygame.font.Font(None, 30)
-    while True:
-        screen.blit(fon, (0, 0))
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                terminate()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                x, y = event.pos
-                if x >= 147 and x <= 402:
-                    if y >= 137 and y <= 213:
-                        terminate()
-                if x >= 446 and x <= 936:
-                    if y >= 113 and y <= 223:
-                        mode = 3.1
-                        return
-                    elif y >= 277 and y <= 373:
-                        mode = 3.2
-                    elif y >= 420 and y <= 500:
-                        mode = 3.3
-
-        pygame.display.flip()
-        clock.tick(FPS)
-
-player = AnimatedSprite(load_image("player_D_inv.png"), 4, 1, 100, 100, rkey=0, ykey=0, bkey=0, bosskey=1, money=0)
-level_x, level_y = generate_level(load_level('карта.txt'), 1)
-running = True
-keypress = None
-camera = Camera()
-watch = "d"
-timer = False
-timer_z = -1
-kill = False
-lvl = 1
-mode = 3
-"""
-mode
-1 - игра
-2 - магазин
-3 - меню
-3.1 - выбор сложности
-3.2  - правила
-3.3 - статистика"""
-sh_flag = True
-
-while running:
-    if mode == 1:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 table_group.update(player.rect.x, player.rect.y, event)
                 door_group.update(player.rect.x, player.rect.y, event)
@@ -1184,6 +1102,7 @@ while running:
         if keypress == "m":
             keypress = ""
             mode = 2
+            return
         if keypress == "r":
             player.rect.x += STEP
             if player.sward:
@@ -1296,6 +1215,120 @@ while running:
         # обновляем положение всех спрайтов
         for sprite in all_sprites:
             camera.apply(sprite)
+
+
+def difficulty_menu():
+    global mode, game_f, diff
+    fon = pygame.transform.scale(load_image('diff_menu.png'), (width, height))
+    screen.blit(fon, (0, 0))
+    fontB = pygame.font.Font(None, 100)
+    fontS = pygame.font.Font(None, 30)
+    while True:
+        screen.blit(fon, (0, 0))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                print(event.pos)
+                x, y = event.pos
+                if x >= 241 and x <= 590:
+                    if y >= 424 and y <= 516:
+                        mode = 3
+                        return
+                if x >= 677 and x <= 1009:
+                    if y >= 80 and y <= 155:
+                        print("easy")
+                        diff = 3
+                        if game_f:
+                            mode = 1
+                        else:
+                            mode = 1.1
+                            game_f = True
+                        return
+                    elif y >= 212 and y <= 279:
+                        print("medium")
+                        diff = 2
+                        if game_f:
+                            mode = 1.2
+                        else:
+                            mode = 1.1
+                            game_f = True
+                        return
+                    elif y >= 318 and y <= 380:
+                        print("hard")
+                        diff = 1
+                        if game_f:
+                            mode = 1.2
+                        else:
+                            mode = 1.1
+                            game_f = True
+                        return
+                    elif y >= 410 and y <= 475:
+                        print("random")
+                        diff = random.randrange(1, 4)
+                        if game_f:
+                            mode = 1.2
+                        else:
+                            mode = 1.1
+                            game_f = True
+                        return
+        pygame.display.flip()
+        clock.tick(FPS)
+def main_menu():
+    global mode
+    fon = pygame.transform.scale(load_image('menu.png'), (width, height))
+    screen.blit(fon, (0, 0))
+    fontB = pygame.font.Font(None, 100)
+    fontS = pygame.font.Font(None, 30)
+    while True:
+        screen.blit(fon, (0, 0))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                x, y = event.pos
+                if x >= 147 and x <= 402:
+                    if y >= 137 and y <= 213:
+                        terminate()
+                if x >= 446 and x <= 936:
+                    if y >= 113 and y <= 223:
+                        mode = 3.1
+                        return
+                    elif y >= 277 and y <= 373:
+                        mode = 3.2
+                    elif y >= 420 and y <= 500:
+                        mode = 3.3
+
+        pygame.display.flip()
+        clock.tick(FPS)
+game_f = False
+running = True
+keypress = None
+camera = Camera()
+watch = "d"
+timer = False
+timer_z = -1
+kill = False
+lvl = 1
+mode = 3
+diff = random.randrange(1, 4)
+"""
+mode
+1 - игра
+2 - магазин
+3 - меню
+3.1 - выбор сложности
+3.2  - правила
+3.3 - статистика"""
+sh_flag = True
+
+while running:
+    if mode == 1:
+        play(3)
+    elif mode == 1.1:
+        play(0)
+    elif mode == 1.2:
+        play(1)
     elif mode == 2:
         shop()
     elif mode == 3:
