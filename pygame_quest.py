@@ -230,15 +230,14 @@ class Skeleton(pygame.sprite.Sprite):
                         player.del_life(self.damage)
                         print("здоровье игрока", player.life)
                         timer = True
-                        """
                         if player.life <= 0:
                             if player.life_count > 0:
                                 player.life_count -= 1
-                                player.rect.x = 100
-                                player.x = 100
-                                player.rect.y = 100
-                                player.y = 100
-                        """
+                                if lvl == 1:
+                                    player.rect.x = 100
+                                    player.rect.y = 100
+                                    player.x = 100
+                                    player.y = 100
                 else:
                     timer = True
             else:
@@ -1029,6 +1028,23 @@ def win_screen():
         pygame.display.flip()
         clock.tick(FPS)
 
+def lose_screen():
+    global mode
+    fon = pygame.transform.scale(load_image('green.png'), (width, height))
+    screen.blit(fon, (0, 0))
+    font = pygame.font.Font(None, 250)
+    sfont = pygame.font.Font(None, 40)
+    screen.blit(sfont.render("Нажмити на любую клавишу, чтобы продолжить", True, (255, 255, 255)), (250, 500))
+    screen.blit(font.render("YOU LOSE", True, (255, 0, 0)), (200, 250))
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif event.type == pygame.KEYDOWN:
+                mode = 3
+                return
+        pygame.display.flip()
+        clock.tick(FPS)
 
 
 
@@ -1321,7 +1337,7 @@ def main_menu():
         pygame.display.flip()
         clock.tick(FPS)
 
-
+lose_screen()
 game_f = False
 running = True
 keypress = None
@@ -1341,7 +1357,9 @@ mode
 3.1 - выбор сложности
 3.2  - правила
 3.3 - статистика
-4 - win"""
+4 - win
+5 - lose
+"""
 sh_flag = True
 
 while running:
@@ -1361,5 +1379,7 @@ while running:
         rules()
     elif mode == 4:
         win_screen()
+    elif mode == 5:
+        lose_screen()
 
 pygame.quit()
