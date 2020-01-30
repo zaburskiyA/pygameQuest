@@ -171,7 +171,7 @@ class Skeleton(pygame.sprite.Sprite):
         self.x = x
         self.y = y
         self.life = 150
-        self.damage = 5
+        self.damage = 10
         self.check_update = 0
         self.mask = pygame.mask.from_surface(self.image)
 
@@ -185,7 +185,7 @@ class Skeleton(pygame.sprite.Sprite):
                     frame_location, self.rect.size)))
 
     def move_towards_player(self, player):
-        global timer
+        global timer, mode
         dx, dy = player.rect.x - self.rect.x, player.rect.y - self.rect.y
         dist = math.hypot(dx, dy) + 1
         dx, dy = dx / dist, dy / dist
@@ -231,13 +231,17 @@ class Skeleton(pygame.sprite.Sprite):
                         print("здоровье игрока", player.life)
                         timer = True
                         if player.life <= 0:
-                            if player.life_count > 0:
+                            if player.life_count > 1:
                                 player.life_count -= 1
+                                player.life = 100
                                 if lvl == 1:
-                                    player.rect.x = 100
-                                    player.rect.y = 100
-                                    player.x = 100
-                                    player.y = 100
+                                    player.rect.x = spawn.rect.x
+                                    player.rect.y = spawn.rect.y
+                                    player.x = spawn.rect.x
+                                    player.y = spawn.rect.y
+                            else:
+                                mode = 5
+                                return
                 else:
                     timer = True
             else:
@@ -338,7 +342,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
                     frame_location, self.rect.size)))
 
     def update(self):
-        global kill, level_x, level_y, lvl, mode
+        global kill, level_x, level_y, lvl, mode, spawn
         if kill:
             pygame.sprite.Sprite.kill(self)
         self.check_frame += 1
@@ -363,6 +367,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
                 self.x = 1650
                 self.rect.y = 50
                 self.y = 50
+                spawn = Spawn1(self.rect.x, self.rect.y)
                 lvl += 1
             elif lvl == 2:
                 level_x, level_y = generate_level(load_level('карта3.txt'), 3)
@@ -370,6 +375,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
                 self.x = 1200
                 self.rect.y = 550
                 self.y = 550
+                spawn = Spawn1(self.rect.x, self.rect.y)
                 lvl += 1
             elif lvl == 3:
                 mode = 4
@@ -442,6 +448,20 @@ class AnimatedSprite(pygame.sprite.Sprite):
         textsurface = myfont.render('Здоровье: ' + str(self.life), True, (255, 255, 255))
         screen.blit(textsurface, (10, 10))
         pygame.display.flip()
+
+    def clear(self):
+        self.rkey = 0
+        self.ykey = 0
+        self.bkey = 0
+        self.bosskey = 0
+        self.Money = 0
+        self.life = 100
+        self.dist = 70
+        self.damage = 20
+        self.fight = 0
+        self.shuriken = 0
+        self.sward = False
+        self.flag_sk = False
 
 
 def load_image(name, colorkey=None):
@@ -717,6 +737,22 @@ class Ladder(pygame.sprite.Sprite):
         self.rect.y = y
         if texture == 1:
             self.image = self.imagegreen
+
+    def update(self):
+        global kill
+        if kill:
+            pygame.sprite.Sprite.kill(self)
+
+
+class Spawn1(pygame.sprite.Sprite):
+    image = load_image("grass.png")
+
+    def __init__(self, x, y):
+        super().__init__(all_sprites, grass_gr)
+        self.image = Spawn1.image
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
 
     def update(self):
         global kill
@@ -1028,6 +1064,7 @@ def win_screen():
         pygame.display.flip()
         clock.tick(FPS)
 
+
 def lose_screen():
     global mode
     fon = pygame.transform.scale(load_image('green.png'), (width, height))
@@ -1047,12 +1084,11 @@ def lose_screen():
         clock.tick(FPS)
 
 
-
 def play(num_play):
-    global keypress, watch, timer, timer_z, kill, lvl, mode, sh_flag, level_x, level_y, player, lvl
+    global keypress, watch, timer, timer_z, kill, lvl, mode, sh_flag, level_x, level_y, player, lvl, spawn
     if num_play == 0:
-        player = AnimatedSprite(load_image("player_D_inv.png"), 4, 1, 100, 100, rkey=20, ykey=20, bkey=20, bosskey=3,
-                                money=1000)
+        player = AnimatedSprite(load_image("player_D_inv.png"), 4, 1, 100, 100, rkey=0, ykey=0, bkey=0, bosskey=0,
+                                money=0)
         num_play += 1
     if num_play == 1:
         lvl = 1
@@ -1062,7 +1098,9 @@ def play(num_play):
         player.y = 100
         player.rect.y = 100
         player.life_count = diff
-        player.life = 100
+        player.clear()
+        player.bosskey = 3
+        spawn = Spawn1(player.rect.x, player.rect.y)
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -1216,7 +1254,9 @@ def play(num_play):
         # обновляем положение всех спрайтов
         for sprite in all_sprites:
             camera.apply(sprite)
-        if mode == 4:
+        if mode == 4 or mode == 5:
+            kill_all()
+            player.clear()
             return
 
 
@@ -1337,7 +1377,7 @@ def main_menu():
         pygame.display.flip()
         clock.tick(FPS)
 
-lose_screen()
+
 game_f = False
 running = True
 keypress = None
