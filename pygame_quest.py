@@ -8,7 +8,9 @@ screen = pygame.display.set_mode(size)
 
 clock = pygame.time.Clock()
 FPS = 60
-STEP = 9
+STEP = 4
+sounds = [pygame.mixer.Sound('data/lvl1.ogg'), pygame.mixer.Sound('data/lvl2.ogg'), pygame.mixer.Sound('data/lvl3.ogg'),
+          pygame.mixer.Sound('data/hit.ogg')]
 
 
 class FinalBoss(pygame.sprite.Sprite):
@@ -564,6 +566,8 @@ class AnimatedSprite(pygame.sprite.Sprite):
         elif coll3:
             kill_all()
             if lvl == 1:
+                sounds[0].stop()
+                sounds[1].play()
                 spawn, level_x, level_y = generate_level(load_level('карта2.txt'), 2)
                 self.life = 100
                 self.rect.x = 1650
@@ -572,6 +576,8 @@ class AnimatedSprite(pygame.sprite.Sprite):
                 self.y = 50
                 lvl += 1
             elif lvl == 2:
+                pygame.mixer.stop()
+                sounds[2].play()
                 spawn, level_x, level_y = generate_level(load_level('карта3.txt'), 3)
                 self.life = 100
                 self.rect.x = 1200
@@ -1358,6 +1364,7 @@ def play(num_play):
         num_play += 1
     if num_play == 1:
         lvl = 1
+        sounds[0].play()
         spawn, level_x, level_y = generate_level(load_level('карта.txt'), 1)
         player.rect.x = spawn.rect.x
         player.x = spawn.rect.x
@@ -1462,6 +1469,7 @@ def play(num_play):
         player.get_info()
 
         if keypress == "f":
+            sounds[3].play()
             player.fight_flag(True)
             if watch == "r":
                 if player.sward:
@@ -1676,6 +1684,7 @@ msh_flag = True
 
 while running:
     if mode == 1:
+
         play(3)
     elif mode == 1.1:
         play(0)
