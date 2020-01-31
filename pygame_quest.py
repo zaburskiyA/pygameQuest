@@ -13,6 +13,120 @@ clock = pygame.time.Clock()
 FPS = 60
 STEP = 9
 
+class FinalBoss(pygame.sprite.Sprite):
+    def __init__(self, sheet, columns, rows, x, y, damage, life, region=350):
+        super().__init__(all_sprites, boss_gr)
+        self.frames = []
+        self.cut_sheet(sheet, columns, rows)
+        self.cur_frame = 0
+        self.image = self.frames[self.cur_frame]
+        self.rect = self.rect.move(x, y)
+        self.xd2 = x
+        self.region = region
+        self.yd2 = y
+        self.x = x
+        self.y = y
+        self.life = life
+        self.damage = damage
+        self.check_update = 0
+        self.mask = pygame.mask.from_surface(self.image)
+
+    def cut_sheet(self, sheet, columns, rows):
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
+                                sheet.get_height() // rows)
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                self.frames.append(sheet.subsurface(pygame.Rect(
+                    frame_location, self.rect.size)))
+
+    def move_towards_player(self, player):
+        global timer, mode
+        dx, dy = player.rect.x - self.rect.x, player.rect.y - self.rect.y
+        dist = math.hypot(dx, dy) + 1
+        dx, dy = dx / dist, dy / dist
+
+        px, py = player.coord()
+        dx2, dy2 = px - self.xd2, py - self.yd2
+        dist2 = math.hypot(dx2, dy2) + 1
+        coll4 = pygame.sprite.groupcollide(player_group, boss_gr, False, False,
+                                           collided=pygame.sprite.collide_mask)
+        coll5 = pygame.sprite.groupcollide(shuriken_gr, boss_gr, False, False,
+                                           collided=pygame.sprite.collide_mask)
+
+        if abs(dist2) < self.region or abs(dist) < 300:
+            if dist < player.dist:
+                if player.fight == 1:
+                    self.del_life(player.damage)
+                    print("здоровье босса", self.life)
+                    player.damage = 0
+                    if self.life <= 0:
+                        pygame.sprite.Sprite.kill(self)
+                        print("u kill boss")
+                        player.add_money(random.choice((10, 10, 10, 15, 20)))
+                        player.add_key("bosskey")
+
+            if coll4:
+                if player.flag_sk:
+                    player.flag_sk = False
+                    if pygame.sprite.groupcollide(player_group, boss_gr, False, False,
+                                                  collided=pygame.sprite.collide_mask):
+                        player.del_life(self.damage)
+                        print("здоровье игрока", player.life)
+                        timer = True
+                        if player.life <= 0:
+                            if player.life_count > 1:
+                                player.life_count -= 1
+                                player.life = 100
+                                player.rect.x = spawn.rect.x
+                                player.rect.y = spawn.rect.y
+                                player.x = spawn.rect.x
+                                player.y = spawn.rect.y
+                            else:
+                                mode = 5
+                                return
+                else:
+                    timer = True
+            else:
+                pass
+        if coll5:
+            self.del_life(30)
+            print("здоровье босса", self.life)
+            if self.life <= 0:
+                pygame.sprite.Sprite.kill(self)
+                print("u kill boss")
+                player.add_money(random.choice((10, 10, 10, 15, 20)))
+                player.add_key("bosskey")
+
+    def update(self):
+        global kill
+        self.check_update += 1
+        self.move_towards_player(player)
+        if self.check_update % 30 == 0:
+            self.cur_frame = (self.cur_frame + 1) % len(self.frames)
+            self.image = self.frames[self.cur_frame]
+        if kill:
+            pygame.sprite.Sprite.kill(self)
+
+    def change(self, sheet, columns, rows, x, y):
+        self.frames = []
+        self.cut_sheet(sheet, columns, rows)
+        self.cur_frame %= 4
+        self.image = self.frames[self.cur_frame]
+        self.rect = self.rect.move(x, y)
+
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                self.frames.append(sheet.subsurface(pygame.Rect(
+                    frame_location, self.rect.size)))
+
+    def del_life(self, num):
+        self.life -= num
+
+    def add_life(self, num):
+        self.life += num
+
 
 class Boss(pygame.sprite.Sprite):
     def __init__(self, sheet, columns, rows, x, y, damage, life, speed, num_boss, region=350):
@@ -1310,7 +1424,7 @@ def difficulty_menu():
                         print("easy")
                         diff = 3
                         if game_f:
-                            mode = 1
+                            mode = 1.2
                         else:
                             mode = 1.1
                             game_f = True
