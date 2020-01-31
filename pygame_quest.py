@@ -1406,6 +1406,8 @@ def play(num_play):
                     keypress = "tab"
                 elif event.key == 109:
                     keypress = "m"
+                elif event.key == 110:
+                    keypress = "n"
                 elif event.key == 103:
                     keypress = "g"
             elif event.type == pygame.KEYUP:
@@ -1566,6 +1568,31 @@ def rules():
         pygame.display.flip()
         clock.tick(FPS)
 
+def setting_menu():
+    global mode, game_f, diff, music
+    music = True
+    fon1 = pygame.transform.scale(load_image('setting.jpg'), (width, height))
+    fon2 = pygame.transform.scale(load_image('setting.jpg'), (width, height))
+    screen.blit(fon1, (0, 0))
+    while True:
+        if music:
+            screen.blit(fon1, (0, 0))
+        else:
+            screen.blit(fon2, (0, 0))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                print(event.pos)
+                x, y = event.pos
+                if y >= 429 and y <= 521:
+                    if x >= 239 and x <= 595:
+                        pass
+                    if x >= 723 and x <= 972:
+                        music = not music
+
+        pygame.display.flip()
+        clock.tick(FPS)
 
 def difficulty_menu():
     global mode, game_f, diff
@@ -1656,7 +1683,7 @@ def main_menu():
         pygame.display.flip()
         clock.tick(FPS)
 
-
+setting_menu()
 game_f = False
 running = True
 keypress = None
@@ -1670,6 +1697,7 @@ mode = 3
 diff = random.randrange(1, 4)
 error_timer = False
 error_timer_z = -1
+music = True
 """
 mode
 1 - игра
@@ -1704,5 +1732,7 @@ while running:
         win_screen()
     elif mode == 5:
         lose_screen()
+    elif mode == 6:
+        setting_menu()
 
 pygame.quit()
