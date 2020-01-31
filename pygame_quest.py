@@ -3,9 +3,6 @@ from math import sqrt
 import math
 
 pygame.init()
-# infoObject = pygame.display.Info()
-# screen = pygame.display.set_mode((infoObject.current_w - 500, infoObject.current_h - 300))
-# size = width, height = infoObject.current_w, infoObject.current_h
 size = width, height = 1200, 600
 screen = pygame.display.set_mode(size)
 
@@ -298,7 +295,7 @@ class Boss(pygame.sprite.Sprite):
 
 
 class Skeleton(pygame.sprite.Sprite):
-    def __init__(self, sheet, columns, rows, x, y):
+    def __init__(self, sheet, columns, rows, x, y, damage=10, life=150):
         super().__init__(all_sprites, monster_gr)
         self.frames = []
         self.cut_sheet(sheet, columns, rows)
@@ -309,8 +306,8 @@ class Skeleton(pygame.sprite.Sprite):
         self.yd2 = y
         self.x = x
         self.y = y
-        self.life = 150
-        self.damage = 10
+        self.life = life
+        self.damage = damage
         self.check_update = 0
         self.mask = pygame.mask.from_surface(self.image)
 
@@ -427,6 +424,72 @@ class Skeleton(pygame.sprite.Sprite):
 
     def add_life(self, num):
         self.life += num
+
+class Ghost(Skeleton):
+    def move_towards_player(self, player):
+        global timer, mode
+        dx, dy = player.rect.x - self.rect.x, player.rect.y - self.rect.y
+        dist = math.hypot(dx, dy) + 1
+        dx, dy = dx / dist, dy / dist
+
+        px, py = player.coord()
+        dx2, dy2 = px - self.xd2, py - self.yd2
+        dist2 = math.hypot(dx2, dy2) + 1
+        coll3 = pygame.sprite.groupcollide(player_group, monster_gr, False, False,
+                                           collided=pygame.sprite.collide_rect)
+        coll4 = pygame.sprite.groupcollide(player_group, monster_gr, False, False,
+                                           collided=pygame.sprite.collide_mask)
+        coll5 = pygame.sprite.groupcollide(shuriken_gr, monster_gr, False, False,
+                                           collided=pygame.sprite.collide_mask)
+
+        if abs(dist2) < 200 or abs(dist) < 70:
+            if dist < player.dist:
+                if player.fight == 1:
+                    self.del_life(player.damage)
+                    print("здоровье призрака", self.life)
+                    player.damage = 0
+                    if self.life <= 0:
+                        pygame.sprite.Sprite.kill(self)
+                        print("u kill ghost")
+                        player.add_money(random.choice((10, 10, 10, 15, 20)))
+
+            if coll4:
+                if player.flag_sk:
+                    player.flag_sk = False
+                    if pygame.sprite.groupcollide(player_group, monster_gr, False, False,
+                                                  collided=pygame.sprite.collide_mask):
+                        player.del_life(self.damage)
+                        print("здоровье игрока", player.life)
+                        timer = True
+                        if player.life <= 0:
+                            if player.life_count > 1:
+                                player.life_count -= 1
+                                player.life = 100
+                                player.rect.x = spawn.rect.x
+                                player.rect.y = spawn.rect.y
+                                player.x = spawn.rect.x
+                                player.y = spawn.rect.y
+                            else:
+                                mode = 5
+                                return
+                else:
+                    timer = True
+            else:
+                self.rect.x += dx * 2
+                self.rect.y += dy * 2
+                self.x += dx * 2
+                self.y += dy * 2
+        if coll5:
+            self.del_life(30)
+            print("здоровье скелета", self.life)
+            if self.life <= 0:
+                pygame.sprite.Sprite.kill(self)
+                print("u kill skeleton")
+                player.add_money(random.choice((10, 10, 10, 15, 20)))
+        if dx < 0:
+            self.change(load_image('skeletonL.png'), 4, 1, self.rect.x, self.rect.y)
+        else:
+            self.change(load_image('skeleton.png'), 4, 1, self.rect.x, self.rect.y)
 
 
 class AnimatedSprite(pygame.sprite.Sprite):
@@ -1288,12 +1351,10 @@ def play(num_play):
         player.rect.y = spawn.rect.y
         player.life_count = diff
         player.clear()
-        """
         player.bosskey = 3
         player.ykey = 20
         player.bkey = 20
         player.rkey = 20
-        """
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
