@@ -88,7 +88,7 @@ class FinalBoss(pygame.sprite.Sprite):
                 else:
                     timer = True
             else:
-                if msh_flag and player.flag_sk:
+                if msh_flag and player.flag_sk: #TODO
                     player.flag_sk = False
                     if dx < 0:
                         if dy < 0:
@@ -1376,6 +1376,9 @@ def play(num_play):
         player.ykey = 20
         player.bkey = 20
         player.rkey = 20
+    msh_flag = True
+    timer = True
+    timer_z = -1
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -1465,7 +1468,6 @@ def play(num_play):
             if collis:
                 player.rect.y -= STEP
                 player.y -= STEP
-        # TODO
         player.get_info()
 
         if keypress == "f":
