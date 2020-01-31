@@ -89,16 +89,29 @@ class FinalBoss(pygame.sprite.Sprite):
                 else:
                     timer = True
             else:
-                if msh_flag:
-                    shell = Monstershells(self.rect.x, self.rect.y, -1, -1)
-                    shell = Monstershells(self.rect.x, self.rect.y, 0, -1)
-                    shell = Monstershells(self.rect.x, self.rect.y, 1, -1)
-                    shell = Monstershells(self.rect.x, self.rect.y, 1, 0)
-                    shell = Monstershells(self.rect.x, self.rect.y, 1, 1)
-                    shell = Monstershells(self.rect.x, self.rect.y, 0, 1)
-                    shell = Monstershells(self.rect.x, self.rect.y, -1, 1)
-                    shell = Monstershells(self.rect.x, self.rect.y, -1, 0)
+                if msh_flag and player.flag_sk:
+                    player.flag_sk = False
+                    if dx < 0:
+                        if dy < 0:
+                            shell = Monstershells(self.rect.x, self.rect.y, -1, -1)
+                            shell = Monstershells(self.rect.x, self.rect.y, 0, -1)
+                            shell = Monstershells(self.rect.x, self.rect.y, -1, 0)
+                        else:
+                            shell = Monstershells(self.rect.x, self.rect.y, -1, 1)
+                            shell = Monstershells(self.rect.x, self.rect.y, 0, 1)
+                            shell = Monstershells(self.rect.x, self.rect.y, -1, 0)
+                    else:
+                        if dy < 0:
+                            shell = Monstershells(self.rect.x, self.rect.y, 0, -1)
+                            shell = Monstershells(self.rect.x, self.rect.y, 1, -1)
+                            shell = Monstershells(self.rect.x, self.rect.y, 1, 0)
+                        else:
+                            shell = Monstershells(self.rect.x, self.rect.y, 1, 1)
+                            shell = Monstershells(self.rect.x, self.rect.y, 0, 1)
+                            shell = Monstershells(self.rect.x, self.rect.y, 1, 0)
                     msh_flag = False
+                else:
+                    timer = True
         if coll5:
             self.del_life(30)
             print("здоровье босса", self.life)
@@ -482,12 +495,15 @@ class AnimatedSprite(pygame.sprite.Sprite):
                                            collided=pygame.sprite.collide_mask)
         coll3 = pygame.sprite.groupcollide(player_group, ladder_gr, False, False,
                                            collided=pygame.sprite.collide_rect)
+        coll4 = pygame.sprite.groupcollide(player_group, shell_gr, False, False,
+                                           collided=pygame.sprite.collide_mask)
         if coll or coll1 or coll2:
             return True
         elif coll3:
             kill_all()
             if lvl == 1:
                 spawn, level_x, level_y = generate_level(load_level('карта2.txt'), 2)
+                self.life = 100
                 self.rect.x = 1650
                 self.x = 1650
                 self.rect.y = 50
@@ -495,6 +511,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
                 lvl += 1
             elif lvl == 2:
                 spawn, level_x, level_y = generate_level(load_level('карта3.txt'), 3)
+                self.life = 100
                 self.rect.x = 1200
                 self.x = 1200
                 self.rect.y = 550
@@ -649,9 +666,10 @@ class Monstershells(pygame.sprite.Sprite):
         self.rect.y = ply
         self.runx = runx
         self.runy = runy
+        self.mask = pygame.mask.from_surface(self.image)
 
     def update(self):
-        global kill, msh_flag
+        global kill, msh_flag, mode
         if kill:
             pygame.sprite.Sprite.kill(self)
         coll = pygame.sprite.groupcollide(shell_gr, wall_group, False, False,
@@ -663,6 +681,20 @@ class Monstershells(pygame.sprite.Sprite):
         coll3 = pygame.sprite.groupcollide(shell_gr, player_group, False, False,
                                            collided=pygame.sprite.collide_mask)
         if coll or coll1 or coll2 or coll3:
+            if coll3:
+                player.del_life(10)
+                print("здоровье игрока", player.life)
+                if player.life <= 0:
+                    if player.life_count > 1:
+                        player.life_count -= 1
+                        player.life = 100
+                        player.rect.x = spawn.rect.x
+                        player.rect.y = spawn.rect.y
+                        player.x = spawn.rect.x
+                        player.y = spawn.rect.y
+                    else:
+                        mode = 5
+                        return
             msh_flag = True
             pygame.sprite.Sprite.kill(self)
         self.rect.x += self.runx * 6
@@ -1026,7 +1058,7 @@ def generate_level(level, numlvl):
             elif level[y][x] == '@':
                 wall = Wall(x * 50, y * 50, x * 50 + 50, y * 50 + 50)
                 if numlvl == 1:
-                    skelet = FinalBoss(load_image("final_boss.png"), 4, 1, 350, 400, 25, 900)
+                    skelet = Skeleton(load_image("skeleton.png"), 4, 1, 350, 400)
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 700, 100)
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 700, 400)
                     boss = Boss(load_image("fBossR.png"), 4, 1, 1500, 400, 20, 1000, 1, 1)
@@ -1041,6 +1073,7 @@ def generate_level(level, numlvl):
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 1800, 300)
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 1650, 300)
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 1650, 50)
+                    boss = FinalBoss(load_image("final_boss.png"), 4, 1, 450, 250, 25, 3000)
             elif level[y][x] == 'Y':
                 door = Door(x * 50, y * 50, "Y")
             elif level[y][x] == '=':
@@ -1241,7 +1274,7 @@ def lose_screen():
 
 
 def play(num_play):
-    global keypress, watch, timer, timer_z, kill, lvl, mode, sh_flag, level_x, level_y, player, lvl, spawn
+    global keypress, watch, timer, timer_z, kill, lvl, mode, sh_flag, level_x, level_y, player, lvl, spawn, msh_flag
     if num_play == 0:
         player = AnimatedSprite(load_image("player_D_inv.png"), 4, 1, 100, 100, rkey=0, ykey=0, bkey=0, bosskey=0,
                                 money=0)
@@ -1255,7 +1288,12 @@ def play(num_play):
         player.rect.y = spawn.rect.y
         player.life_count = diff
         player.clear()
+        """
         player.bosskey = 3
+        player.ykey = 20
+        player.bkey = 20
+        player.rkey = 20
+        """
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
