@@ -517,7 +517,6 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.sward = False
         self.x = x
         self.y = y
-        self.name = player
         self.flag_sk = False
         self.life_count = life_count
 
@@ -1618,7 +1617,7 @@ def setting_menu():
         clock.tick(FPS)
 
 def keyboard():
-    global mode, game_f, diff
+    global mode, game_f, diff, player_name
     fon = pygame.transform.scale(load_image('keyboard.jpg'), (width, height))
     var = ""
     screen.blit(fon, (0, 0))
@@ -1646,10 +1645,10 @@ def keyboard():
                     w = False
                 if x >= 597 and x <= 1024:
                     if y >= 83 and y <= 150 and len(var) > 0:
-                        player.name = var
+                        player_name = var
                 if x >= 140 and x <= 359:
                     if y >= 81 and y <= 141:
-                        mode = 3
+                        mode = 3.1
                         return
             elif event.type == pygame.KEYUP:
                 if w:
@@ -1681,6 +1680,7 @@ def difficulty_menu():
     fontS = pygame.font.Font(None, 30)
     while True:
         screen.blit(fon, (0, 0))
+        screen.blit(fontS.render("Ник: " + player_name, True, (0, 0, 0)), (350, 180))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
@@ -1728,6 +1728,10 @@ def difficulty_menu():
                             mode = 1.1
                             game_f = True
                         return
+                if x >= 233 and x <= 527:
+                    if y >= 283 and y <= 340:
+                        mode = 7
+                        return
         pygame.display.flip()
         clock.tick(FPS)
 
@@ -1761,7 +1765,6 @@ def main_menu():
 
         pygame.display.flip()
         clock.tick(FPS)
-keyboard()
 game_f = False
 running = True
 keypress = None
@@ -1776,6 +1779,7 @@ diff = random.randrange(1, 4)
 error_timer = False
 error_timer_z = -1
 music = True
+player_name = "player"
 """
 mode
 1 - игра
