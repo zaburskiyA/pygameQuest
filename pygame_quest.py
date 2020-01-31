@@ -1255,6 +1255,9 @@ def shop():
                         product4 = True
                 if product1:
                     product1 = False
+                    product2 = False
+                    product3 = False
+                    product4 = False
                     if player.Money >= 10 and player.shuriken < 100:
                         player.shuriken += 1
                         player.del_money(10)
@@ -1264,7 +1267,10 @@ def shop():
                         error_timer_z = pygame.time.get_ticks()
                         error_timer = True
                 elif product2:
+                    product1 = False
                     product2 = False
+                    product3 = False
+                    product4 = False
                     if player.Money >= 70 and player.life <= 90:
                         player.life += 10
                         player.del_money(70)
@@ -1274,7 +1280,10 @@ def shop():
                         error_timer_z = pygame.time.get_ticks()
                         error_timer = True
                 elif product3:
+                    product1 = False
+                    product2 = False
                     product3 = False
+                    product4 = False
                     if player.Money >= 150 and not player.sward:
                         player.sward = True
                         player.damage += 10
@@ -1285,6 +1294,9 @@ def shop():
                         error_timer_z = pygame.time.get_ticks()
                         error_timer = True
                 elif product4:
+                    product1 = False
+                    product2 = False
+                    product3 = False
                     product4 = False
                     if player.Money >= 100 and player.dist == 70:
                         player.dist += 5
