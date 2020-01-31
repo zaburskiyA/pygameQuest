@@ -517,6 +517,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.sward = False
         self.x = x
         self.y = y
+        self.name = player
         self.flag_sk = False
         self.life_count = life_count
 
@@ -1622,27 +1623,53 @@ def keyboard():
     var = ""
     screen.blit(fon, (0, 0))
     fontB = pygame.font.Font(None, 100)
-    fontS = pygame.font.Font(None, 30)
+    fontS = pygame.font.Font(None, 40)
     abc = "abcdefghijklmnopqrstuvwxyz"
+    numbers = "0123456789"
+    w = False
 
     while True:
         screen.blit(fon, (0, 0))
+        screen.blit(fontS.render(var, True, (0, 0, 0)), (350, 180))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                print(event.pos)
+                x, y = event.pos
+                if x >= 338 and x <= 831:
+                    if y >= 163 and y <= 234:
+                        w = True
+                    else:
+                        w = False
+                else:
+                    w = False
+                if x >= 597 and x <= 1024:
+                    if y >= 83 and y <= 150 and len(var) > 0:
+                        player.name = var
+                if x >= 140 and x <= 359:
+                    if y >= 81 and y <= 141:
+                        mode = 3
+                        return
             elif event.type == pygame.KEYUP:
-                print(event.key)
-                a = event.key
-                a -= 97
-                if a >= 0 and a <= 26 and len(var) < 20:
-                    var += abc[a]
-                    print(var)
-                elif event.key == 8 and len(var) > 0:
-                    var = var[:-1]
-                    print(var)
-                elif event.key == 32 and len(var) < 20:
-                    var += " "
-                    print(var)
+                if w:
+                    print(event.key)
+                    a = event.key
+                    n = event.key
+                    n -= 48
+                    a -= 97
+                    if a >= 0 and a <= 26 and len(var) < 20:
+                        var += abc[a]
+                        print(var)
+                    elif event.key >= 48 and event.key <= 57:
+                        var += numbers[n]
+                        print(var)
+                    elif event.key == 8 and len(var) > 0:
+                        var = var[:-1]
+                        print(var)
+                    elif event.key == 32 and len(var) < 20:
+                        var += " "
+                        print(var)
 
         pygame.display.flip()
         clock.tick(FPS)
