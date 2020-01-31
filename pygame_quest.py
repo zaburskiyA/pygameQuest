@@ -1422,6 +1422,10 @@ def play(num_play):
             keypress = ""
             mode = 2
             return
+        if keypress == "n":
+            keypress = ""
+            mode = 6
+            return
         if keypress == "r":
             player.rect.x += STEP
             if player.sward:
@@ -1571,7 +1575,7 @@ def rules():
 def setting_menu():
     global mode, game_f, diff, music
     music = True
-    fon1 = pygame.transform.scale(load_image('setting.jpg'), (width, height))
+    fon1 = pygame.transform.scale(load_image('setting_music.jpg'), (width, height))
     fon2 = pygame.transform.scale(load_image('setting.jpg'), (width, height))
     screen.blit(fon1, (0, 0))
     while True:
@@ -1585,11 +1589,31 @@ def setting_menu():
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 print(event.pos)
                 x, y = event.pos
-                if y >= 429 and y <= 521:
-                    if x >= 239 and x <= 595:
-                        pass
-                    if x >= 723 and x <= 972:
+                if x >= 287 and x <= 897:
+                    if y >= 135 and y <= 235:
+                        mode = 1
+                        return
+                    elif y >= 273 and y <= 363:
+                        mode = 3
+                        kill_all()
+                        return
+                    if y >= 398 and y <= 495 and x <= 424:
                         music = not music
+                        if music:
+                            if lvl == 1:
+                                sounds[0].play()
+                            elif lvl == 2:
+                                sounds[1].play()
+                            elif lvl == 3:
+                                sounds[2]. play()
+                        else:
+                            if lvl == 1:
+                                sounds[0].stop()
+                            elif lvl == 2:
+                                sounds[1].stop()
+                            elif lvl == 3:
+                                sounds[2].stop()
+
 
         pygame.display.flip()
         clock.tick(FPS)
@@ -1683,7 +1707,6 @@ def main_menu():
         pygame.display.flip()
         clock.tick(FPS)
 
-setting_menu()
 game_f = False
 running = True
 keypress = None
