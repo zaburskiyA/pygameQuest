@@ -1613,11 +1613,39 @@ def setting_menu():
                                 sounds[1].stop()
                             elif lvl == 3:
                                 sounds[2].stop()
-
-
         pygame.display.flip()
         clock.tick(FPS)
 
+def keyboard():
+    global mode, game_f, diff
+    fon = pygame.transform.scale(load_image('keyboard.jpg'), (width, height))
+    var = ""
+    screen.blit(fon, (0, 0))
+    fontB = pygame.font.Font(None, 100)
+    fontS = pygame.font.Font(None, 30)
+    abc = "abcdefghijklmnopqrstuvwxyz"
+
+    while True:
+        screen.blit(fon, (0, 0))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif event.type == pygame.KEYUP:
+                print(event.key)
+                a = event.key
+                a -= 97
+                if a >= 0 and a <= 26 and len(var) < 20:
+                    var += abc[a]
+                    print(var)
+                elif event.key == 8 and len(var) > 0:
+                    var = var[:-1]
+                    print(var)
+                elif event.key == 32 and len(var) < 20:
+                    var += " "
+                    print(var)
+
+        pygame.display.flip()
+        clock.tick(FPS)
 def difficulty_menu():
     global mode, game_f, diff
     fon = pygame.transform.scale(load_image('diff_menu.png'), (width, height))
@@ -1706,7 +1734,7 @@ def main_menu():
 
         pygame.display.flip()
         clock.tick(FPS)
-
+keyboard()
 game_f = False
 running = True
 keypress = None
@@ -1757,5 +1785,7 @@ while running:
         lose_screen()
     elif mode == 6:
         setting_menu()
+    elif mode == 7:
+        keyboard()
 
 pygame.quit()
