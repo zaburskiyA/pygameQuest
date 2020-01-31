@@ -425,6 +425,7 @@ class Skeleton(pygame.sprite.Sprite):
     def add_life(self, num):
         self.life += num
 
+
 class Ghost(Skeleton):
     def move_towards_player(self, player):
         global timer, mode
@@ -435,8 +436,6 @@ class Ghost(Skeleton):
         px, py = player.coord()
         dx2, dy2 = px - self.xd2, py - self.yd2
         dist2 = math.hypot(dx2, dy2) + 1
-        coll3 = pygame.sprite.groupcollide(player_group, monster_gr, False, False,
-                                           collided=pygame.sprite.collide_rect)
         coll4 = pygame.sprite.groupcollide(player_group, monster_gr, False, False,
                                            collided=pygame.sprite.collide_mask)
         coll5 = pygame.sprite.groupcollide(shuriken_gr, monster_gr, False, False,
@@ -475,10 +474,10 @@ class Ghost(Skeleton):
                 else:
                     timer = True
             else:
-                self.rect.x += dx * 2
-                self.rect.y += dy * 2
-                self.x += dx * 2
-                self.y += dy * 2
+                self.rect.x += dx * 1.5
+                self.rect.y += dy * 1.5
+                self.x += dx * 1.5
+                self.y += dy * 1.5
         if coll5:
             self.del_life(30)
             print("здоровье скелета", self.life)
@@ -487,9 +486,9 @@ class Ghost(Skeleton):
                 print("u kill skeleton")
                 player.add_money(random.choice((10, 10, 10, 15, 20)))
         if dx < 0:
-            self.change(load_image('skeletonL.png'), 4, 1, self.rect.x, self.rect.y)
+            self.change(load_image('ghostL.png'), 4, 1, self.rect.x, self.rect.y)
         else:
-            self.change(load_image('skeleton.png'), 4, 1, self.rect.x, self.rect.y)
+            self.change(load_image('ghostR.png'), 4, 1, self.rect.x, self.rect.y)
 
 
 class AnimatedSprite(pygame.sprite.Sprite):
@@ -1121,7 +1120,7 @@ def generate_level(level, numlvl):
             elif level[y][x] == '@':
                 wall = Wall(x * 50, y * 50, x * 50 + 50, y * 50 + 50)
                 if numlvl == 1:
-                    skelet = Skeleton(load_image("skeleton.png"), 4, 1, 350, 400)
+                    ghost = Ghost(load_image("ghostL.png"), 4, 1, 350, 400)
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 700, 100)
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 700, 400)
                     boss = Boss(load_image("fBossR.png"), 4, 1, 1500, 400, 20, 1000, 1, 1)
@@ -1137,6 +1136,7 @@ def generate_level(level, numlvl):
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 1650, 300)
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 1650, 50)
                     boss = FinalBoss(load_image("final_boss.png"), 4, 1, 450, 250, 25, 3000)
+                    ghost = Ghost(load_image("ghostL.png"), 4, 1, 400, 200, 10, 500)
             elif level[y][x] == 'Y':
                 door = Door(x * 50, y * 50, "Y")
             elif level[y][x] == '=':
@@ -1209,7 +1209,8 @@ def information():
 def shop():
     """функция срабатывает, если mode = 2
     если нажать клавишу m, то mode = 2"""
-    global mode
+    global keypress, watch, timer, timer_z, kill, lvl, mode, sh_flag, level_x, level_y, player, lvl, spawn, msh_flag
+    global error_timer, error_timer_z
     product1 = False
     product2 = False
     product3 = False
@@ -1299,7 +1300,7 @@ def shop():
 
 
 def win_screen():
-    global mode
+    global keypress, watch, timer, timer_z, kill, lvl, mode, sh_flag, level_x, level_y, player, lvl, spawn, msh_flag
     fon = pygame.transform.scale(load_image('box.png'), (width, height))
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 250)
@@ -1318,7 +1319,7 @@ def win_screen():
 
 
 def lose_screen():
-    global mode
+    global keypress, watch, timer, timer_z, kill, lvl, mode, sh_flag, level_x, level_y, player, lvl, spawn, msh_flag
     fon = pygame.transform.scale(load_image('green.png'), (width, height))
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 250)
@@ -1338,6 +1339,7 @@ def lose_screen():
 
 def play(num_play):
     global keypress, watch, timer, timer_z, kill, lvl, mode, sh_flag, level_x, level_y, player, lvl, spawn, msh_flag
+    global error_timer_z, error_timer
     if num_play == 0:
         player = AnimatedSprite(load_image("player_D_inv.png"), 4, 1, 100, 100, rkey=0, ykey=0, bkey=0, bosskey=0,
                                 money=0)
@@ -1644,6 +1646,8 @@ kill = False
 lvl = 1
 mode = 3
 diff = random.randrange(1, 4)
+error_timer = False
+error_timer_z = -1
 """
 mode
 1 - игра
