@@ -13,6 +13,7 @@ clock = pygame.time.Clock()
 FPS = 60
 STEP = 9
 
+
 class FinalBoss(pygame.sprite.Sprite):
     def __init__(self, sheet, columns, rows, x, y, damage, life, region=350):
         super().__init__(all_sprites, boss_gr)
@@ -41,7 +42,7 @@ class FinalBoss(pygame.sprite.Sprite):
                     frame_location, self.rect.size)))
 
     def move_towards_player(self, player):
-        global timer, mode
+        global timer, mode, msh_flag
         dx, dy = player.rect.x - self.rect.x, player.rect.y - self.rect.y
         dist = math.hypot(dx, dy) + 1
         dx, dy = dx / dist, dy / dist
@@ -88,7 +89,16 @@ class FinalBoss(pygame.sprite.Sprite):
                 else:
                     timer = True
             else:
-                pass
+                if msh_flag:
+                    shell = Monstershells(self.rect.x, self.rect.y, -1, -1)
+                    shell = Monstershells(self.rect.x, self.rect.y, 0, -1)
+                    shell = Monstershells(self.rect.x, self.rect.y, 1, -1)
+                    shell = Monstershells(self.rect.x, self.rect.y, 1, 0)
+                    shell = Monstershells(self.rect.x, self.rect.y, 1, 1)
+                    shell = Monstershells(self.rect.x, self.rect.y, 0, 1)
+                    shell = Monstershells(self.rect.x, self.rect.y, -1, 1)
+                    shell = Monstershells(self.rect.x, self.rect.y, -1, 0)
+                    msh_flag = False
         if coll5:
             self.del_life(30)
             print("здоровье босса", self.life)
@@ -628,6 +638,37 @@ class Shuriken(pygame.sprite.Sprite):
         self.rect.y += self.dy * 6
 
 
+class Monstershells(pygame.sprite.Sprite):
+    image = load_image("shur.png")
+
+    def __init__(self, plx, ply, runx=0, runy=0):
+        super().__init__(all_sprites, shell_gr)
+        self.image = Monstershells.image
+        self.rect = self.image.get_rect()
+        self.rect.x = plx
+        self.rect.y = ply
+        self.runx = runx
+        self.runy = runy
+
+    def update(self):
+        global kill, msh_flag
+        if kill:
+            pygame.sprite.Sprite.kill(self)
+        coll = pygame.sprite.groupcollide(shell_gr, wall_group, False, False,
+                                          collided=pygame.sprite.collide_mask)
+        coll1 = pygame.sprite.groupcollide(shell_gr, table_group, False, False,
+                                           collided=pygame.sprite.collide_mask)
+        coll2 = pygame.sprite.groupcollide(shell_gr, door_group, False, False,
+                                           collided=pygame.sprite.collide_mask)
+        coll3 = pygame.sprite.groupcollide(shell_gr, player_group, False, False,
+                                           collided=pygame.sprite.collide_mask)
+        if coll or coll1 or coll2 or coll3:
+            msh_flag = True
+            pygame.sprite.Sprite.kill(self)
+        self.rect.x += self.runx * 6
+        self.rect.y += self.runy * 6
+
+
 def wait(second, now):
     return pygame.time.get_ticks() - now > second * 1000 - 100 and \
            pygame.time.get_ticks() - now < second * 1000 + 100
@@ -968,6 +1009,7 @@ boss_gr = pygame.sprite.Group()
 ladder_gr = pygame.sprite.Group()
 grass_gr = pygame.sprite.Group()
 shuriken_gr = pygame.sprite.Group()
+shell_gr = pygame.sprite.Group()
 
 
 def generate_level(level, numlvl):
@@ -984,7 +1026,7 @@ def generate_level(level, numlvl):
             elif level[y][x] == '@':
                 wall = Wall(x * 50, y * 50, x * 50 + 50, y * 50 + 50)
                 if numlvl == 1:
-                    skelet = Skeleton(load_image("skeleton.png"), 4, 1, 350, 400)
+                    skelet = FinalBoss(load_image("final_boss.png"), 4, 1, 350, 400, 25, 900)
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 700, 100)
                     skelet = Skeleton(load_image("skeleton.png"), 4, 1, 700, 400)
                     boss = Boss(load_image("fBossR.png"), 4, 1, 1500, 400, 20, 1000, 1, 1)
@@ -1355,6 +1397,7 @@ def play(num_play):
             if pygame.time.get_ticks() % 5000 == 1:
                 player.add_life(5)
         boss_gr.update()
+        shell_gr.update()
         shuriken_gr.update()
         monster_gr.update()
         screen.fill((0, 0, 0))
@@ -1514,6 +1557,7 @@ mode
 5 - lose
 """
 sh_flag = True
+msh_flag = True
 
 while running:
     if mode == 1:
