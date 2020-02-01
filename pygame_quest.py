@@ -58,7 +58,7 @@ class FinalBoss(pygame.sprite.Sprite):
                                            collided=pygame.sprite.collide_mask)
 
         if abs(dist2) < self.region or abs(dist) < 300:
-            if dist < player.dist:
+            if dist + 10 < player.dist:
                 if player.fight == 1:
                     self.del_life(player.damage)
                     print("здоровье босса", self.life)
