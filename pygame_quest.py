@@ -1,16 +1,20 @@
+import datetime
 import os, pygame, random, sys
+import sqlite3
 from math import sqrt
 import math
+
 
 pygame.init()
 size = width, height = 1200, 600
 screen = pygame.display.set_mode(size)
-
+count_down = 0
 clock = pygame.time.Clock()
 FPS = 60
 STEP = 4
 sounds = [pygame.mixer.Sound('data/lvl1.ogg'), pygame.mixer.Sound('data/lvl2.ogg'), pygame.mixer.Sound('data/lvl3.ogg'),
           pygame.mixer.Sound('data/hit.ogg')]
+dct = {}
 
 
 class FinalBoss(pygame.sprite.Sprite):
@@ -88,7 +92,7 @@ class FinalBoss(pygame.sprite.Sprite):
                 else:
                     timer = True
             else:
-                if msh_flag and player.flag_sk: #TODO
+                if msh_flag and player.flag_sk:  # TODO
                     player.flag_sk = False
                     if dx < 0:
                         if dy < 0:
@@ -498,6 +502,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
                  life=100, dist=70):
         super().__init__(all_sprites, player_group)
         self.frames = []
+        self.game_time = datetime.datetime.now()
         self.cut_sheet(sheet, columns, rows)
         self.cur_frame = 0
         self.image = self.frames[self.cur_frame]
@@ -1192,6 +1197,16 @@ def kill_all():
     kill = False
 
 
+def write_to_db(delta):
+    con = sqlite3.connect("pygame_quest.db")
+    cur = con.cursor()
+    result = cur.execute("""INSERT INTO base(highscore, difficulty)
+         VALUES((SELECT ID FROM users WHERE name is (ivan)), {}, '{}')""".format(name, delta, diff))
+
+    con.commit()
+    con.close()  # TODO
+
+
 def information():
     intro_text = ["Количество жизней: {}".format(player.life_count),
                   "Жёлтых ключей: {}".format(player.ykey),
@@ -1223,7 +1238,6 @@ def shop():
     product4 = False
     error_timer = False
     error_timer_z = -1
-
     fon = pygame.transform.scale(load_image('fon.jpg'), (width, height))
     screen.blit(fon, (0, 0))
     fontB = pygame.font.Font(None, 100)
@@ -1340,6 +1354,8 @@ def lose_screen():
     global keypress, watch, timer, timer_z, kill, lvl, mode, sh_flag, level_x, level_y, player, lvl, spawn, msh_flag
     fon = pygame.transform.scale(load_image('green.png'), (width, height))
     screen.blit(fon, (0, 0))
+    delta = datetime.datetime.now() - player.game_time
+    write_to_db(delta.seconds)
     font = pygame.font.Font(None, 250)
     sfont = pygame.font.Font(None, 40)
     screen.blit(sfont.render("Нажмити на любую клавишу, чтобы продолжить", True, (255, 255, 255)), (250, 500))
@@ -1357,13 +1373,15 @@ def lose_screen():
 
 def play(num_play):
     global keypress, watch, timer, timer_z, kill, lvl, mode, sh_flag, level_x, level_y, player, lvl, spawn, msh_flag
-    global error_timer_z, error_timer
+
+    global error_timer_z, error_timer, count_down
     if num_play == 0:
         player = AnimatedSprite(load_image("player_D_inv.png"), 4, 1, 100, 100, rkey=0, ykey=0, bkey=0, bosskey=0,
                                 money=0)
         num_play += 1
     if num_play == 1:
         lvl = 1
+
         sounds[0].play()
         spawn, level_x, level_y = generate_level(load_level('карта.txt'), 1)
         player.rect.x = spawn.rect.x
@@ -1632,6 +1650,7 @@ def main_menu():
     screen.blit(fon, (0, 0))
     fontB = pygame.font.Font(None, 100)
     fontS = pygame.font.Font(None, 30)
+
     while True:
         screen.blit(fon, (0, 0))
         for event in pygame.event.get():
