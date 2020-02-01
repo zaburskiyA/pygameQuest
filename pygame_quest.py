@@ -1604,7 +1604,6 @@ def rules():
 
 def setting_menu():
     global mode, game_f, diff, music
-    music = True
     fon1 = pygame.transform.scale(load_image('setting_music.jpg'), (width, height))
     fon2 = pygame.transform.scale(load_image('setting.jpg'), (width, height))
     screen.blit(fon1, (0, 0))
