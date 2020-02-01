@@ -197,8 +197,6 @@ class Boss(pygame.sprite.Sprite):
                                            collided=pygame.sprite.collide_mask)
         coll2 = pygame.sprite.groupcollide(boss_gr, door_group, False, False,
                                            collided=pygame.sprite.collide_mask)
-        coll3 = pygame.sprite.groupcollide(player_group, boss_gr, False, False,
-                                           collided=pygame.sprite.collide_rect)
         coll4 = pygame.sprite.groupcollide(player_group, boss_gr, False, False,
                                            collided=pygame.sprite.collide_mask)
         coll5 = pygame.sprite.groupcollide(shuriken_gr, boss_gr, False, False,
@@ -219,7 +217,7 @@ class Boss(pygame.sprite.Sprite):
                     if self.life <= 0:
                         pygame.sprite.Sprite.kill(self)
                         print("u kill boss")
-                        player.add_money(random.choice((10, 10, 10, 15, 20)))
+                        player.add_money(random.choice((20, 20, 25, 25)))
                         player.add_key("bosskey")
 
             if coll4:
