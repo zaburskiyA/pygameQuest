@@ -10,7 +10,7 @@ screen = pygame.display.set_mode(size)
 count_down = 0
 clock = pygame.time.Clock()
 FPS = 60
-STEP = 4
+STEP = 3
 sounds = [pygame.mixer.Sound('data/lvl1.ogg'), pygame.mixer.Sound('data/lvl2.ogg'), pygame.mixer.Sound('data/lvl3.ogg'),
           pygame.mixer.Sound('data/hit.ogg')]
 dct = {}
@@ -300,7 +300,7 @@ class Boss(pygame.sprite.Sprite):
 
 
 class Skeleton(pygame.sprite.Sprite):
-    def __init__(self, sheet, columns, rows, x, y, damage=10, life=150):
+    def __init__(self, sheet, columns, rows, x, y, damage=5, life=150):
         super().__init__(all_sprites, monster_gr)
         self.frames = []
         self.cut_sheet(sheet, columns, rows)
@@ -1399,10 +1399,12 @@ def play(num_play):
         player.rect.y = spawn.rect.y
         player.life_count = diff
         player.clear()
+        """
         player.bosskey = 3
         player.ykey = 20
         player.bkey = 20
         player.rkey = 20
+        """
     msh_flag = True
     timer = True
     timer_z = -1
@@ -1550,7 +1552,7 @@ def play(num_play):
                 timer = False
                 timer_z = -1
         if player.life < 95:
-            if pygame.time.get_ticks() % 5000 == 1:
+            if pygame.time.get_ticks() % 10000 in (range(18)):
                 player.add_life(5)
         boss_gr.update()
         shell_gr.update()
