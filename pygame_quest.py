@@ -1580,9 +1580,9 @@ def play(num_play):
 
 def statistics_menu():
     global mode, game_f, diff
-    fon1 = pygame.transform.scale(load_image('rules_1.jpg'), (width, height))
+    fon1 = pygame.transform.scale(load_image('stat_menu.jpg'), (width, height))
     screen.blit(fon1, (0, 0))
-    get_from_db() #TODO
+    #get_from_db() #TODO
     while True:
         screen.blit(fon1, (0, 0))
         for event in pygame.event.get():
@@ -1591,11 +1591,10 @@ def statistics_menu():
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 print(event.pos)
                 x, y = event.pos
-                if y >= 429 and y <= 521:
-                    if x >= 239 and x <= 595:
+                if y >= 437 and y <= 509:
+                    if x >= 223 and x <= 527:
                         mode = 3
                         return
-
         pygame.display.flip()
         clock.tick(FPS)
 
