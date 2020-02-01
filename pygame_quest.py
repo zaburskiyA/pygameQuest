@@ -341,8 +341,6 @@ class Skeleton(pygame.sprite.Sprite):
                                            collided=pygame.sprite.collide_mask)
         coll2 = pygame.sprite.groupcollide(monster_gr, door_group, False, False,
                                            collided=pygame.sprite.collide_mask)
-        coll3 = pygame.sprite.groupcollide(player_group, monster_gr, False, False,
-                                           collided=pygame.sprite.collide_rect)
         coll4 = pygame.sprite.groupcollide(player_group, monster_gr, False, False,
                                            collided=pygame.sprite.collide_mask)
         coll5 = pygame.sprite.groupcollide(shuriken_gr, monster_gr, False, False,
