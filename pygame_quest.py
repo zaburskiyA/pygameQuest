@@ -1207,10 +1207,16 @@ def write_to_db(delta=0):
 
 
 def get_from_db():
+    list_of_results = []
     con = sqlite3.connect("pygame_quest.db")
     cur = con.cursor()
-    result = cur.execute('''select * from base where highscore in (select MIN(highscore) from base)''').fetchall()
-    print(result[-1][0]) # самое быстрое прохождение
+    result = cur.execute('''select * from base order by -highscore''').fetchall()
+    for i in result:
+        name = cur.execute('''select name from Names WHERE ID IN ("{}")'''.format(i[0])).fetchall()
+        difficulty = {1: 'easy', 2: 'medium', 3: 'hard'}
+        elem = str(name[0][0] + ' ' + str(i[1]) + ' сек ' + difficulty[i[2]])
+        list_of_results.append(elem)
+    print(list_of_results)  # самое быстрое прохождение
     con.commit()
     con.close()
     return
