@@ -61,11 +61,9 @@ class FinalBoss(pygame.sprite.Sprite):
             if dist + 10 < player.dist:
                 if player.fight == 1:
                     self.del_life(player.damage)
-                    print("здоровье босса", self.life)
                     player.damage = 0
                     if self.life <= 0:
                         pygame.sprite.Sprite.kill(self)
-                        print("u kill boss")
                         player.add_money(random.choice((10, 10, 10, 15, 20)))
                         player.add_key("bosskey")
 
@@ -75,7 +73,6 @@ class FinalBoss(pygame.sprite.Sprite):
                     if pygame.sprite.groupcollide(player_group, boss_gr, False, False,
                                                   collided=pygame.sprite.collide_mask):
                         player.del_life(self.damage)
-                        print("здоровье игрока", player.life)
                         timer = True
                         if player.life <= 0:
                             if player.life_count > 1:
@@ -91,7 +88,7 @@ class FinalBoss(pygame.sprite.Sprite):
                 else:
                     timer = True
             else:
-                if msh_flag and player.flag_sk:  # TODO
+                if msh_flag and player.flag_sk:
                     player.flag_sk = False
                     if dx < 0:
                         if dy < 0:
@@ -116,10 +113,8 @@ class FinalBoss(pygame.sprite.Sprite):
                     timer = True
         if coll5:
             self.del_life(30)
-            print("здоровье босса", self.life)
             if self.life <= 0:
                 pygame.sprite.Sprite.kill(self)
-                print("u kill boss")
                 player.add_money(random.choice((10, 10, 10, 15, 20)))
                 player.add_key("bosskey")
 
@@ -212,11 +207,9 @@ class Boss(pygame.sprite.Sprite):
             if dist < player.dist:
                 if player.fight == 1:
                     self.del_life(player.damage)
-                    print("здоровье босса", self.life)
                     player.damage = 0
                     if self.life <= 0:
                         pygame.sprite.Sprite.kill(self)
-                        print("u kill boss")
                         player.add_money(random.choice((20, 20, 25, 25)))
                         player.add_key("bosskey")
 
@@ -226,7 +219,6 @@ class Boss(pygame.sprite.Sprite):
                     if pygame.sprite.groupcollide(player_group, boss_gr, False, False,
                                                   collided=pygame.sprite.collide_mask):
                         player.del_life(self.damage)
-                        print("здоровье игрока", player.life)
                         timer = True
                         if player.life <= 0:
                             if player.life_count > 1:
@@ -248,10 +240,8 @@ class Boss(pygame.sprite.Sprite):
                 self.y += dy * 2 * self.speed
         if coll5:
             self.del_life(30)
-            print("здоровье босса", self.life)
             if self.life <= 0:
                 pygame.sprite.Sprite.kill(self)
-                print("u kill boss")
                 player.add_money(random.choice((10, 10, 10, 15, 20)))
                 player.add_key("bosskey")
 
@@ -352,11 +342,9 @@ class Skeleton(pygame.sprite.Sprite):
             if dist < player.dist:
                 if player.fight == 1:
                     self.del_life(player.damage)
-                    print("здоровье скелета", self.life)
                     player.damage = 0
                     if self.life <= 0:
                         pygame.sprite.Sprite.kill(self)
-                        print("u kill skeleton")
                         player.add_money(random.choice((10, 10, 10, 15, 20)))
 
             if coll4:
@@ -365,7 +353,6 @@ class Skeleton(pygame.sprite.Sprite):
                     if pygame.sprite.groupcollide(player_group, monster_gr, False, False,
                                                   collided=pygame.sprite.collide_mask):
                         player.del_life(self.damage)
-                        print("здоровье игрока", player.life)
                         timer = True
                         if player.life <= 0:
                             if player.life_count > 1:
@@ -387,10 +374,8 @@ class Skeleton(pygame.sprite.Sprite):
                 self.y += dy * 2
         if coll5:
             self.del_life(30)
-            print("здоровье скелета", self.life)
             if self.life <= 0:
                 pygame.sprite.Sprite.kill(self)
-                print("u kill skeleton")
                 player.add_money(random.choice((10, 10, 10, 15, 20)))
         if dx < 0:
             self.change(load_image('skeletonL.png'), 4, 1, self.rect.x, self.rect.y)
@@ -446,11 +431,9 @@ class Ghost(Skeleton):
             if dist < player.dist:
                 if player.fight == 1:
                     self.del_life(player.damage)
-                    print("здоровье призрака", self.life)
                     player.damage = 0
                     if self.life <= 0:
                         pygame.sprite.Sprite.kill(self)
-                        print("u kill ghost")
                         player.add_money(random.choice((10, 10, 10, 15, 20)))
 
             if coll4:
@@ -459,7 +442,6 @@ class Ghost(Skeleton):
                     if pygame.sprite.groupcollide(player_group, monster_gr, False, False,
                                                   collided=pygame.sprite.collide_mask):
                         player.del_life(self.damage)
-                        print("здоровье игрока", player.life)
                         timer = True
                         if player.life <= 0:
                             if player.life_count > 1:
@@ -481,10 +463,8 @@ class Ghost(Skeleton):
                 self.y += dy * 1.5
         if coll5:
             self.del_life(30)
-            print("здоровье скелета", self.life)
             if self.life <= 0:
                 pygame.sprite.Sprite.kill(self)
-                print("u kill skeleton")
                 player.add_money(random.choice((10, 10, 10, 15, 20)))
         if dx < 0:
             self.change(load_image('ghostL.png'), 4, 1, self.rect.x, self.rect.y)
@@ -751,7 +731,6 @@ class Monstershells(pygame.sprite.Sprite):
         if coll or coll1 or coll2 or coll3:
             if coll3:
                 player.del_life(10)
-                print("здоровье игрока", player.life)
                 if player.life <= 0:
                     if player.life_count > 1:
                         player.life_count -= 1
@@ -971,10 +950,6 @@ class Table(pygame.sprite.Sprite):
                 player.add_key("b")
             player.add_money(self.Money)
             self.Money = 0
-            print(player.check_key("r"))
-            print(player.check_key("b"))
-            print(player.check_key("y"))
-            print(player.check_money())
         if kill:
             pygame.sprite.Sprite.kill(self)
 
@@ -1201,23 +1176,26 @@ def write_to_db(delta=0):
     else:
         result = cur.execute('''INSERT INTO Names(name) VALUES('{}')'''.format(player_name)).fetchall()
     con.commit()
-    con.close()  # TODO
+    con.close()
 
 
 def get_from_db():
     list_of_results = []
+    myfont = pygame.font.SysFont(None, 30)
     con = sqlite3.connect("pygame_quest.db")
     cur = con.cursor()
     result = cur.execute('''select * from base order by -highscore''').fetchall()
+    n = 0
     for i in result:
-        name = cur.execute('''select name from Names WHERE ID IN ("{}")'''.format(i[0])).fetchall()
-        difficulty = {1: 'easy', 2: 'medium', 3: 'hard'}
-        elem = str(name[0][0] + ' ' + str(i[1]) + ' сек ' + difficulty[i[2]])
-        list_of_results.append(elem)
-    print(list_of_results)  # самое быстрое прохождение
+        if n < 10:
+            n += 1
+            name = cur.execute('''select name from Names WHERE ID IN ("{}")'''.format(i[0])).fetchall()
+            difficulty = {1: 'easy', 2: 'medium', 3: 'hard'}
+            elem = str(name[0][0] + ' ' + str(i[1]) + ' сек ' + difficulty[i[2]])
+            list_of_results.append(elem)
     con.commit()
     con.close()
-    return
+    return list_of_results
 
 
 def information():
@@ -1582,21 +1560,30 @@ def statistics_menu():
     global mode, game_f, diff
     fon1 = pygame.transform.scale(load_image('stat_menu.jpg'), (width, height))
     screen.blit(fon1, (0, 0))
-    #get_from_db() #TODO
+    myfont = pygame.font.SysFont(None, 40)
+    myfontB = pygame.font.SysFont(None, 60)
+    lst = get_from_db()
+    lst.reverse()
     while True:
         screen.blit(fon1, (0, 0))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                print(event.pos)
                 x, y = event.pos
                 if y >= 437 and y <= 509:
                     if x >= 223 and x <= 527:
                         mode = 3
                         return
+        y = 100
+        screen.blit(myfontB.render("Top 10", True, (0, 0, 0)), (100, y - 50))
+        for i in lst:
+            y += 30
+            screen.blit(myfont.render(i, True, (0, 0, 0)), (100, y))
+
         pygame.display.flip()
         clock.tick(FPS)
+
 
 def rules():
     global mode, game_f, diff
@@ -1613,7 +1600,6 @@ def rules():
             if event.type == pygame.QUIT:
                 terminate()
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                print(event.pos)
                 x, y = event.pos
                 if y >= 429 and y <= 521:
                     if x >= 239 and x <= 595:
@@ -1640,7 +1626,6 @@ def setting_menu():
             if event.type == pygame.QUIT:
                 terminate()
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                print(event.pos)
                 x, y = event.pos
                 if x >= 287 and x <= 897:
                     if y >= 135 and y <= 235:
@@ -1688,7 +1673,6 @@ def keyboard():
             if event.type == pygame.QUIT:
                 terminate()
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                print(event.pos)
                 x, y = event.pos
                 if x >= 338 and x <= 831:
                     if y >= 163 and y <= 234:
@@ -1706,23 +1690,18 @@ def keyboard():
                         return
             elif event.type == pygame.KEYUP:
                 if w:
-                    print(event.key)
                     a = event.key
                     n = event.key
                     n -= 48
                     a -= 97
                     if a >= 0 and a <= 26 and len(var) < 20:
                         var += abc[a]
-                        print(var)
                     elif event.key >= 48 and event.key <= 57:
                         var += numbers[n]
-                        print(var)
                     elif event.key == 8 and len(var) > 0:
                         var = var[:-1]
-                        print(var)
                     elif event.key == 32 and len(var) < 20:
                         var += " "
-                        print(var)
 
         pygame.display.flip()
         clock.tick(FPS)
@@ -1741,7 +1720,6 @@ def difficulty_menu():
             if event.type == pygame.QUIT:
                 terminate()
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                print(event.pos)
                 x, y = event.pos
                 if x >= 241 and x <= 590:
                     if y >= 424 and y <= 516:
@@ -1749,7 +1727,6 @@ def difficulty_menu():
                         return
                 if x >= 677 and x <= 1009:
                     if y >= 80 and y <= 155:
-                        print("easy")
                         diff = 3
                         if game_f:
                             mode = 1.2
@@ -1758,7 +1735,6 @@ def difficulty_menu():
                             game_f = True
                         return
                     elif y >= 212 and y <= 279:
-                        print("medium")
                         diff = 2
                         if game_f:
                             mode = 1.2
@@ -1767,7 +1743,6 @@ def difficulty_menu():
                             game_f = True
                         return
                     elif y >= 318 and y <= 380:
-                        print("hard")
                         diff = 1
                         if game_f:
                             mode = 1.2
@@ -1776,7 +1751,6 @@ def difficulty_menu():
                             game_f = True
                         return
                     elif y >= 410 and y <= 475:
-                        print("random")
                         diff = random.randrange(1, 4)
                         if game_f:
                             mode = 1.2
@@ -1814,7 +1788,6 @@ def main_menu():
                         mode = 3.1
                         return
                     elif y >= 277 and y <= 373:
-                        print(1)
                         mode = 3.2
                         return
                     elif y >= 420 and y <= 500:
@@ -1823,6 +1796,7 @@ def main_menu():
 
         pygame.display.flip()
         clock.tick(FPS)
+
 
 game_f = False
 running = True
