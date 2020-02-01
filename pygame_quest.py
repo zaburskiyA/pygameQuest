@@ -1578,6 +1578,27 @@ def play(num_play):
             return
 
 
+def statistics_menu():
+    global mode, game_f, diff
+    fon1 = pygame.transform.scale(load_image('rules_1.jpg'), (width, height))
+    screen.blit(fon1, (0, 0))
+    get_from_db() #TODO
+    while True:
+        screen.blit(fon1, (0, 0))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                print(event.pos)
+                x, y = event.pos
+                if y >= 429 and y <= 521:
+                    if x >= 239 and x <= 595:
+                        mode = 3
+                        return
+
+        pygame.display.flip()
+        clock.tick(FPS)
+
 def rules():
     global mode, game_f, diff
     change = True
@@ -1804,7 +1825,6 @@ def main_menu():
         pygame.display.flip()
         clock.tick(FPS)
 
-
 game_f = False
 running = True
 keypress = None
@@ -1851,7 +1871,7 @@ while running:
     elif mode == 3.2:
         rules()
     elif mode == 3.3:
-        get_from_db()
+        statistics_menu()
         mode = 3
     elif mode == 4:
         win_screen()
