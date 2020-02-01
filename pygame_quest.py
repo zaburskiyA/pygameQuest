@@ -4,7 +4,6 @@ import sqlite3
 from math import sqrt
 import math
 
-
 pygame.init()
 size = width, height = 1200, 600
 screen = pygame.display.set_mode(size)
@@ -1195,14 +1194,20 @@ def kill_all():
     kill = False
 
 
-def write_to_db(delta):
+def write_to_db(delta=0):
     con = sqlite3.connect("pygame_quest.db")
     cur = con.cursor()
-    result = cur.execute("""INSERT INTO base(highscore, difficulty)
-         VALUES((SELECT ID FROM users WHERE name is (ivan)), {}, '{}')""".format(name, delta, diff))
-
+    if delta != 0:
+        result = cur.execute("""INSERT INTO base(Name_ID, highscore, difficulty)
+         VALUES((SELECT ID FROM Names WHERE name is ('{}')), {}, {})""".format(player_name, delta, diff)).fetchall()
+    else:
+        result = cur.execute('''INSERT INTO Names(name) VALUES('{}')'''.format(player_name)).fetchall()
     con.commit()
     con.close()  # TODO
+
+
+def get_from_db():
+    pass
 
 
 def information():
@@ -1333,6 +1338,8 @@ def win_screen():
     global keypress, watch, timer, timer_z, kill, lvl, mode, sh_flag, level_x, level_y, player, lvl, spawn, msh_flag
     fon = pygame.transform.scale(load_image('box.png'), (width, height))
     screen.blit(fon, (0, 0))
+    delta = datetime.datetime.now() - player.game_time
+    write_to_db(delta.seconds)
     font = pygame.font.Font(None, 250)
     sfont = pygame.font.Font(None, 40)
     screen.blit(sfont.render("Нажмити на любую клавишу, чтобы продолжить", True, (255, 255, 255)), (250, 500))
@@ -1352,8 +1359,6 @@ def lose_screen():
     global keypress, watch, timer, timer_z, kill, lvl, mode, sh_flag, level_x, level_y, player, lvl, spawn, msh_flag
     fon = pygame.transform.scale(load_image('green.png'), (width, height))
     screen.blit(fon, (0, 0))
-    delta = datetime.datetime.now() - player.game_time
-    write_to_db(delta.seconds)
     font = pygame.font.Font(None, 250)
     sfont = pygame.font.Font(None, 40)
     screen.blit(sfont.render("Нажмити на любую клавишу, чтобы продолжить", True, (255, 255, 255)), (250, 500))
@@ -1588,6 +1593,7 @@ def rules():
         pygame.display.flip()
         clock.tick(FPS)
 
+
 def setting_menu():
     global mode, game_f, diff, music
     music = True
@@ -1621,7 +1627,7 @@ def setting_menu():
                             elif lvl == 2:
                                 sounds[1].play()
                             elif lvl == 3:
-                                sounds[2]. play()
+                                sounds[2].play()
                         else:
                             if lvl == 1:
                                 sounds[0].stop()
@@ -1631,6 +1637,7 @@ def setting_menu():
                                 sounds[2].stop()
         pygame.display.flip()
         clock.tick(FPS)
+
 
 def keyboard():
     global mode, game_f, diff, player_name
@@ -1688,6 +1695,8 @@ def keyboard():
 
         pygame.display.flip()
         clock.tick(FPS)
+
+
 def difficulty_menu():
     global mode, game_f, diff
     fon = pygame.transform.scale(load_image('diff_menu.png'), (width, height))
@@ -1782,6 +1791,8 @@ def main_menu():
 
         pygame.display.flip()
         clock.tick(FPS)
+
+
 game_f = False
 running = True
 keypress = None
@@ -1835,5 +1846,6 @@ while running:
         setting_menu()
     elif mode == 7:
         keyboard()
+        write_to_db()
 
 pygame.quit()
