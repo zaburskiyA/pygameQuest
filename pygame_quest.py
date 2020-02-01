@@ -1207,7 +1207,13 @@ def write_to_db(delta=0):
 
 
 def get_from_db():
-    pass
+    con = sqlite3.connect("pygame_quest.db")
+    cur = con.cursor()
+    result = cur.execute('''select * from base where highscore in (select MIN(highscore) from base)''').fetchall()
+    print(result[-1][0]) # самое быстрое прохождение
+    con.commit()
+    con.close()
+    return
 
 
 def information():
@@ -1788,6 +1794,7 @@ def main_menu():
                         return
                     elif y >= 420 and y <= 500:
                         mode = 3.3
+                        return
 
         pygame.display.flip()
         clock.tick(FPS)
@@ -1838,6 +1845,9 @@ while running:
         difficulty_menu()
     elif mode == 3.2:
         rules()
+    elif mode == 3.3:
+        get_from_db()
+        mode = 3
     elif mode == 4:
         win_screen()
     elif mode == 5:
